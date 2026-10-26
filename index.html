@@ -151,11 +151,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .rank { color: var(--muted); font-size: 14px; font-weight: 700; }
+    .rank { color: var(--muted); font-size: 16px; font-weight: 800; }
     .player-cell { gap: 6px; min-width: 0; font-weight: 700; }
     .player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .record { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .rate { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .record { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .rate { font-size: 18px; font-weight: 850; font-variant-numeric: tabular-nums; }
     .rate-pill { display: inline-block; min-width: 54px; padding: 6px 9px; border-radius: 2px; background: #293a2b; color: var(--green); text-align: center; }
     .title-code { flex: 0 0 auto; font-size: 14px; font-weight: 850; letter-spacing: .04em; }
     .title-t { color: var(--green); }
@@ -179,6 +179,7 @@
     }
 
     .name-input { width: min(230px, 100%); text-align: left; }
+    .edit-input[type="number"] { font-size: 17px; font-weight: 750; }
     .edit-input:focus, .field input:focus { outline: 2px solid var(--green-dark); outline-offset: 1px; }
 
     .delete-button {
@@ -407,7 +408,7 @@
 
     function render() {
       const ranked = [...players].sort((first, second) =>
-        second.wins - first.wins || winRate(second) - winRate(first) || first.name.localeCompare(second.name, "hr"));
+        second.wins - first.wins || first.name.localeCompare(second.name, "hr"));
       boardBody.innerHTML = ranked.map(renderPlayerRow).join("");
 
       emptyState.hidden = players.length > 0;
