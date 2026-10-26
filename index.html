@@ -278,24 +278,36 @@
       .round-player-card { padding: 13px; }
       .round-editor { grid-template-columns: 1fr 1fr; }
       .round-editor .field:first-child, .round-editor .primary-button { grid-column: 1 / -1; }
-      .table-wrap { margin-right: -16px; padding-right: 16px; overflow-x: auto; }
-      table { display: table; width: 100%; min-width: 610px; }
+      .table-wrap { margin-right: 0; padding-right: 0; overflow-x: hidden; }
+      table { display: table; width: 100%; min-width: 0; table-layout: fixed; }
       thead { position: static; width: auto; height: auto; padding: 0; margin: 0; overflow: visible; clip: auto; white-space: normal; }
       tbody { display: table-row-group; }
       tbody tr { display: table-row; min-height: 0; height: 70px; padding: 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
       tbody tr:hover { background: rgba(185, 229, 91, .045); }
-      td, th { display: table-cell; min-width: 0; padding: 0 10px; }
-      td:first-child { width: 54px; padding-left: 4px; }
-      td:nth-child(2) { width: auto; }
-      td:nth-child(n+3) { width: 82px; text-align: right; }
+      td, th { display: table-cell; min-width: 0; padding: 0 3px; }
+      th:first-child, td:first-child { width: 9%; padding-left: 2px; }
+      th:nth-child(2), td:nth-child(2) { width: 35%; }
+      th:nth-child(3), td:nth-child(3), th:nth-child(4), td:nth-child(4) { width: 12%; text-align: right; }
+      th:nth-child(5), td:nth-child(5) { width: 32%; text-align: right; }
       td::before { content: none !important; display: none; }
-      .player-cell { gap: 6px; width: auto; }
-      .title-code { font-size: 14px; }
-      .rank { font-size: 16px; }
-      .record { font-size: 19px; }
-      .rate { font-size: 18px; }
-      .rate-pill { min-width: 54px; padding: 6px 9px; }
-      td.row-actions { width: 100px; text-align: right; }
+      .player-cell { gap: 3px; width: 100%; overflow: hidden; }
+      .player-name { min-width: 0; }
+      .title-code { font-size: 12px; }
+      .rank { font-size: 13px; }
+      .record { font-size: 15px; }
+      .rate { font-size: 14px; }
+      .rate-pill { min-width: 0; padding: 4px 3px; }
+      th { font-size: 9px; letter-spacing: .04em; }
+      table.editing th:first-child, table.editing td:first-child { width: 8%; }
+      table.editing th:nth-child(2), table.editing td:nth-child(2) { width: 30%; }
+      table.editing th:nth-child(3), table.editing td:nth-child(3), table.editing th:nth-child(4), table.editing td:nth-child(4) { width: 10%; }
+      table.editing th:nth-child(5), table.editing td:nth-child(5) { width: 25%; }
+      table.editing th:last-child, table.editing td:last-child { width: 17%; }
+      table.editing .record, table.editing .rate { font-size: 13px; }
+      table.editing .rate-pill { padding: 4px 2px; }
+      table.editing .edit-input { width: 100%; min-width: 0; padding: 0 2px; }
+      table.editing .name-input { width: 100%; }
+      table.editing .delete-button { padding: 6px 0; font-size: 10px; }
       .add-form { grid-template-columns: 1fr 1fr; }
       .field:first-child { grid-column: 1 / -1; }
       .primary-button { grid-column: 1 / -1; }
@@ -356,7 +368,7 @@
         <span class="section-caption" id="board-caption">Poredano po broju pobjeda</span>
       </div>
       <div class="table-wrap">
-        <table>
+        <table id="leaderboard-table">
           <thead><tr><th scope="col">#</th><th scope="col">Igrač</th><th scope="col">W</th><th scope="col">L</th><th scope="col">Postotak</th><th scope="col" id="actions-heading" hidden>Akcije</th></tr></thead>
           <tbody id="leaderboard-body"></tbody>
         </table>
@@ -618,6 +630,7 @@
     function render() {
       const ranked = [...players].sort((first, second) =>
         second.wins - first.wins || first.name.localeCompare(second.name, "hr"));
+      document.querySelector("#leaderboard-table").classList.toggle("editing", editing);
       boardBody.innerHTML = ranked.map(renderPlayerRow).join("");
 
       emptyState.hidden = players.length > 0;
