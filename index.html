@@ -254,6 +254,9 @@
     .title-overlap-note { margin: 13px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 
     footer { margin-top: 46px; padding-top: 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .sync-status { display: block; margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+    .sync-status[data-state="ok"] { color: var(--green); }
+    .sync-status[data-state="error"] { color: var(--red); }
 
     @media (max-width: 680px) {
       .page { width: min(100% - 32px, 540px); padding-top: 20px; }
@@ -366,7 +369,7 @@
       </form>
     </section>
 
-    <footer>Postotak pobjeda = W ÷ (W + L). Rezultati se spremaju u ovom pregledniku.</footer>
+    <footer>Postotak pobjeda = W ÷ (W + L). Rezultati se dijele sa svim posjetiteljima.<span class="sync-status" id="sync-status" role="status">Spajanje sa zajedničkim rezultatima...</span></footer>
   </main>
 
   <dialog id="password-dialog" aria-labelledby="dialog-title">
@@ -397,7 +400,6 @@
   </dialog>
 
   <script>
-    const ACCESS_CODE = "Filip20111.";
     const STORAGE_KEY = "stolniumjetnici-leaderboard-v1";
     const LONGEST_ROUND_STORAGE_KEY = "stolniumjetnici-longest-round-v1";
     const numberFormat = new Intl.NumberFormat("hr-HR", { maximumFractionDigits: 1 });
@@ -408,9 +410,14 @@
     const passwordInput = document.querySelector("#access-code");
     const passwordError = document.querySelector("#password-error");
     const changeButton = document.querySelector("#change-button");
+    const localBackup = JSON.parse(JSON.stringify({ players: loadPlayers(), longestRound: loadLongestRound() }));
     let editing = false;
-    let players = loadPlayers();
-    let longestRound = loadLongestRound();
+    let editorToken = "";
+    let sharedStateInitialized = false;
+    let sharedStateLoaded = false;
+    let saveQueue = Promise.resolve();
+    let players = localBackup.players.map((player) => ({ ...player }));
+    let longestRound = { ...localBackup.longestRound };
 
     function loadPlayers() {
       try {
@@ -428,10 +435,6 @@
       }
     }
 
-    function savePlayers() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-    }
-
     function loadLongestRound() {
       try {
         const saved = JSON.parse(localStorage.getItem(LONGEST_ROUND_STORAGE_KEY) || "null");
@@ -446,8 +449,83 @@
       }
     }
 
-    function saveLongestRound() {
+    function setSyncStatus(message, state = "") {
+      const status = document.querySelector("#sync-status");
+      status.textContent = message;
+      status.dataset.state = state;
+    }
+
+    function saveSharedState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
       localStorage.setItem(LONGEST_ROUND_STORAGE_KEY, JSON.stringify(longestRound));
+      if (!editorToken) {
+        setSyncStatus("Za spremanje globalno prijavi se kao administrator.");
+        return Promise.resolve(false);
+      }
+
+      const token = editorToken;
+      const payload = JSON.stringify({ players, longestRound });
+      saveQueue = saveQueue.catch(() => false).then(async () => {
+        setSyncStatus("Sinkroniziram rezultate...");
+        const response = await fetch("/api/state", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: payload,
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          editorToken = "";
+          setEditing(false);
+        }
+        if (!response.ok) throw new Error(result.error || "Rezultati nisu sinkronizirani.");
+        sharedStateInitialized = true;
+        setSyncStatus("Rezultati su sinkronizirani za sve posjetitelje.", "ok");
+        return true;
+      }).catch((error) => {
+        setSyncStatus(error.message || "Sinkronizacija nije uspjela.", "error");
+        return false;
+      });
+      return saveQueue;
+    }
+
+    function savePlayers() {
+      return saveSharedState();
+    }
+
+    function saveLongestRound() {
+      return saveSharedState();
+    }
+
+    async function loadSharedState() {
+      try {
+        const response = await fetch("/api/state", { cache: "no-store" });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.state) throw new Error(result.error || "Zajednički rezultati nisu dostupni.");
+
+        sharedStateInitialized = Boolean(result.initialized);
+        if (sharedStateInitialized) {
+          players = Array.isArray(result.state.players) ? result.state.players : [];
+          longestRound = result.state.longestRound || { number: "", firstPlayerId: "", secondPlayerId: "", finalBlowPlayerId: "" };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+          localStorage.setItem(LONGEST_ROUND_STORAGE_KEY, JSON.stringify(longestRound));
+          setSyncStatus("Rezultati su sinkronizirani za sve posjetitelje.", "ok");
+        } else if (editorToken) {
+          players = localBackup.players.map((player) => ({ ...player }));
+          longestRound = { ...localBackup.longestRound };
+          setSyncStatus("Prvi administrator će prenijeti postojeće rezultate.");
+        } else {
+          players = [];
+          longestRound = { ...emptyState.longestRound };
+          setSyncStatus("Čekaju se početni rezultati administratora.");
+        }
+
+        sharedStateLoaded = true;
+        render();
+        return true;
+      } catch (error) {
+        setSyncStatus(error.message || "Ne mogu se povezati sa zajedničkim rezultatima.", "error");
+        return false;
+      }
     }
 
     function winRate(player) {
@@ -573,6 +651,7 @@
     changeButton.addEventListener("click", () => {
       if (editing) {
         setEditing(false);
+        loadSharedState();
         return;
       }
       passwordError.textContent = "";
@@ -586,15 +665,31 @@
 
     document.querySelector("#cancel-password").addEventListener("click", () => passwordDialog.close());
 
-    document.querySelector("#password-form").addEventListener("submit", (event) => {
+    document.querySelector("#password-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (passwordInput.value !== ACCESS_CODE) {
-        passwordError.textContent = "Kod nije točan. Pokušaj ponovno.";
+      const submitButton = event.currentTarget.querySelector("button[type=submit]");
+      submitButton.disabled = true;
+      passwordError.textContent = "Provjeravam kod...";
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: passwordInput.value }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Kod nije točan. Pokušaj ponovno.");
+        editorToken = result.token;
+        const stateLoaded = await loadSharedState();
+        if (!stateLoaded) throw new Error("Ne mogu se povezati sa zajedničkom bazom.");
+        passwordDialog.close();
+        setEditing(true);
+        if (!sharedStateInitialized) await saveSharedState();
+      } catch (error) {
+        passwordError.textContent = error.message || "Prijava nije uspjela. Pokušaj ponovno.";
         passwordInput.select();
-        return;
+      } finally {
+        submitButton.disabled = false;
       }
-      passwordDialog.close();
-      setEditing(true);
     });
 
     document.querySelector("#add-form").addEventListener("submit", (event) => {
@@ -675,6 +770,10 @@
     });
 
     render();
+    loadSharedState();
+    window.setInterval(() => {
+      if (!editing) loadSharedState();
+    }, 15000);
   </script>
 </body>
 </html>
