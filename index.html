@@ -130,6 +130,34 @@
     .stat { padding: 17px 20px 18px 0; }
     .stat + .stat { padding-left: 22px; border-left: 1px solid var(--line); }
     .stat-value { display: block; margin-top: 7px; font-family: Georgia, serif; font-size: 29px; font-weight: 700; }
+    .top-player-stat { display: block; margin-top: 7px; }
+    .top-player-detail { display: block; overflow-wrap: anywhere; color: var(--ink); font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif; font-size: 14px; font-weight: 700; line-height: 1.3; }
+    .top-player-title { margin-right: 4px; }
+    .top-rate { display: block; margin-top: 2px; font-family: Georgia, "Times New Roman", serif; font-size: 29px; font-weight: 800; line-height: 1.05; }
+
+    .longest-round-section { margin: 0 0 38px; }
+    .longest-round-card { padding: 22px 24px 24px; border: 1px solid var(--line); border-radius: 4px; background: linear-gradient(135deg, rgba(185, 229, 91, .07), transparent 55%), var(--surface); }
+    .record-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .record-header h2 { margin: 7px 0 0; font-family: Georgia, serif; font-size: 22px; font-weight: 400; }
+    .record-tag { padding: 6px 8px; border: 1px solid #41513b; color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+    .round-number { display: block; width: 100%; margin: 16px 0 20px; color: var(--green); font-family: Georgia, serif; font-size: 72px; font-weight: 800; line-height: .95; text-align: center; overflow-wrap: anywhere; }
+    .round-player-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .round-player-card { min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: 3px; background: rgba(11, 17, 16, .6); }
+    .round-player-name { display: flex; align-items: baseline; gap: 7px; min-width: 0; font-size: 18px; font-weight: 800; overflow-wrap: anywhere; }
+    .round-player-title { flex: 0 0 auto; }
+    .round-player-stats { margin-top: 7px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .round-player-rank { font-weight: 800; }
+    .final-blow-label { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .final-blow-label:has(input:checked) { color: var(--green); }
+    .final-blow-label input { width: 17px; height: 17px; margin: 0; accent-color: var(--green); }
+    .final-blow-display { margin: 14px 0 0; color: var(--green); font-size: 12px; font-weight: 800; }
+    .record-empty { margin: 0; color: var(--muted); font-size: 13px; }
+    .round-editor { display: grid; grid-template-columns: 150px minmax(150px, 1fr) minmax(150px, 1fr) auto; align-items: end; gap: 12px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .round-editor[hidden] { display: none; }
+    .record-error { grid-column: 1 / -1; min-height: 16px; margin: 0; color: var(--red); font-size: 12px; }
+    .field select { width: 100%; height: 42px; padding: 0 11px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); color: var(--ink); }
+    .round-editor select:focus { outline: 2px solid var(--green-dark); outline-offset: 1px; }
+    .round-editor .primary-button { min-width: 125px; }
 
     .section-heading { margin-bottom: 13px; }
     .section-heading h2 { margin: 0; font-family: Georgia, serif; font-size: 23px; font-weight: 400; }
@@ -233,12 +261,33 @@
       .change-button, .titles-button { min-height: 40px; padding: 0 11px; }
       .intro { grid-template-columns: 1fr; gap: 13px; margin-top: 55px; }
       .intro-note { max-width: 310px; }
-      .stats { margin-bottom: 29px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 29px; }
       .stat { padding-right: 10px; }
       .stat + .stat { padding-left: 12px; }
+      .stat:last-child { grid-column: 1 / -1; padding: 14px 0 16px; border-top: 1px solid var(--line); border-left: 0; }
       .stat-value { font-size: 24px; }
-      .table-wrap { margin-right: -16px; padding-right: 16px; }
-      table { min-width: 610px; }
+      .top-rate { font-size: 24px; }
+      .longest-round-section { margin-bottom: 30px; }
+      .longest-round-card { padding: 17px 15px 18px; }
+      .record-header h2 { font-size: 20px; }
+      .round-number { margin: 14px 0 16px; font-size: 48px; }
+      .round-player-list { grid-template-columns: 1fr; gap: 8px; }
+      .round-player-card { padding: 13px; }
+      .round-editor { grid-template-columns: 1fr 1fr; }
+      .round-editor .field:first-child, .round-editor .primary-button { grid-column: 1 / -1; }
+      .table-wrap { overflow: visible; }
+      table { display: block; width: 100%; }
+      thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      tbody { display: grid; gap: 9px; }
+      tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; height: auto; padding: 13px 11px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); }
+      tbody tr:hover { background: #17221e; }
+      td, th { min-width: 0; padding: 0; }
+      td:first-child { width: auto; padding-left: 0; }
+      td:nth-child(2) { grid-column: 2 / -1; width: auto; }
+      td:nth-child(n+3) { width: auto; text-align: left; }
+      td:nth-child(n+3):not(:last-child) { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+      td:nth-child(n+3)::before { content: attr(data-label); color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+      td:last-child { grid-column: 1 / -1; width: auto; text-align: left; }
       .add-form { grid-template-columns: 1fr 1fr; }
       .field:first-child { grid-column: 1 / -1; }
       .primary-button { grid-column: 1 / -1; }
@@ -271,7 +320,26 @@
     <section class="stats" aria-label="Statistika lige">
       <div class="stat"><span class="stat-label">Igrači</span><strong class="stat-value" id="player-count">0</strong></div>
       <div class="stat"><span class="stat-label">Odigrano mečeva</span><strong class="stat-value" id="match-count">0</strong></div>
-      <div class="stat"><span class="stat-label">Najbolji postotak</span><strong class="stat-value" id="top-rate">—</strong></div>
+      <div class="stat"><span class="stat-label">Najbolji postotak</span><div class="top-player-stat"><span class="top-player-detail" id="top-player-detail"><span class="top-player-title" id="top-player-title"></span><span id="top-player-line">—</span></span><strong class="top-rate" id="top-rate"></strong></div></div>
+    </section>
+
+    <section class="longest-round-section" aria-labelledby="longest-round-title">
+      <div class="longest-round-card">
+        <div class="record-header">
+          <div><div class="eyebrow">Poseban rekord</div><h2 id="longest-round-title">Rekord za najdulju rundu</h2></div>
+          <span class="record-tag">REKORD</span>
+        </div>
+        <strong class="round-number" id="longest-round-number">—</strong>
+        <div class="round-player-list" id="round-player-list"></div>
+        <p class="record-empty" id="round-empty">Rekord još nije postavljen.</p>
+        <form class="round-editor" id="round-editor" hidden>
+          <div class="field"><label for="round-number-input">Broj rekorda</label><input id="round-number-input" name="recordNumber" type="number" min="0" step="any" required></div>
+          <div class="field"><label for="round-player-one">Prvi igrač</label><select id="round-player-one" name="playerOne" required></select></div>
+          <div class="field"><label for="round-player-two">Drugi igrač</label><select id="round-player-two" name="playerTwo" required></select></div>
+          <button class="primary-button" type="submit">Spremi rekord</button>
+          <p class="record-error" id="round-error" role="alert"></p>
+        </form>
+      </div>
     </section>
 
     <section aria-labelledby="leaderboard-title">
@@ -331,6 +399,7 @@
   <script>
     const ACCESS_CODE = "Filip20111.";
     const STORAGE_KEY = "stolniumjetnici-leaderboard-v1";
+    const LONGEST_ROUND_STORAGE_KEY = "stolniumjetnici-longest-round-v1";
     const numberFormat = new Intl.NumberFormat("hr-HR", { maximumFractionDigits: 1 });
     const boardBody = document.querySelector("#leaderboard-body");
     const emptyState = document.querySelector("#empty-state");
@@ -341,6 +410,7 @@
     const changeButton = document.querySelector("#change-button");
     let editing = false;
     let players = loadPlayers();
+    let longestRound = loadLongestRound();
 
     function loadPlayers() {
       try {
@@ -360,6 +430,24 @@
 
     function savePlayers() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+    }
+
+    function loadLongestRound() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(LONGEST_ROUND_STORAGE_KEY) || "null");
+        return {
+          number: saved && saved.number !== undefined ? String(saved.number) : "",
+          firstPlayerId: saved && typeof saved.firstPlayerId === "string" ? saved.firstPlayerId : "",
+          secondPlayerId: saved && typeof saved.secondPlayerId === "string" ? saved.secondPlayerId : "",
+          finalBlowPlayerId: saved && typeof saved.finalBlowPlayerId === "string" ? saved.finalBlowPlayerId : "",
+        };
+      } catch {
+        return { number: "", firstPlayerId: "", secondPlayerId: "", finalBlowPlayerId: "" };
+      }
+    }
+
+    function saveLongestRound() {
+      localStorage.setItem(LONGEST_ROUND_STORAGE_KEY, JSON.stringify(longestRound));
     }
 
     function winRate(player) {
@@ -389,21 +477,59 @@
       const title = titleForWins(player.wins);
       return `
         <tr>
-          <td class="rank">${index + 1}</td>
-          <td><div class="player-cell">${title
+          <td class="rank${title ? ` title-${title.className}` : ""}" data-label="#">${index + 1}</td>
+          <td data-label="Igrač"><div class="player-cell">${title
             ? `<span class="title-code title-${title.className}" title="${title.name}" aria-label="Titula: ${title.name}">${title.code}</span>`
             : ""}${editing
             ? `<input class="edit-input name-input" aria-label="Ime igrača" data-id="${escapeHtml(player.id)}" data-field="name" maxlength="50" value="${escapeHtml(player.name)}">`
             : `<span class="player-name">${escapeHtml(player.name)}</span>`}</div></td>
-          <td class="record">${editing
+          <td class="record" data-label="W">${editing
             ? `<input class="edit-input" aria-label="Pobjede igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="wins" type="number" min="0" step="1" value="${player.wins}">`
             : player.wins}</td>
-          <td class="record">${editing
+          <td class="record" data-label="L">${editing
             ? `<input class="edit-input" aria-label="Porazi igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="losses" type="number" min="0" step="1" value="${player.losses}">`
             : player.losses}</td>
-          <td class="rate"><span class="rate-pill">${formatRate(player)}</span></td>
-          ${editing ? `<td><button class="delete-button" type="button" data-delete="${escapeHtml(player.id)}" aria-label="Obriši igrača ${escapeHtml(player.name)}">Obriši</button></td>` : ""}
+          <td class="rate" data-label="Postotak"><span class="rate-pill">${formatRate(player)}</span></td>
+          ${editing ? `<td data-label="Akcije"><button class="delete-button" type="button" data-delete="${escapeHtml(player.id)}" aria-label="Obriši igrača ${escapeHtml(player.name)}">Obriši</button></td>` : ""}
         </tr>`;
+    }
+
+    function renderLongestRound(rankedPlayers) {
+      const numberDisplay = document.querySelector("#longest-round-number");
+      const playerList = document.querySelector("#round-player-list");
+      const emptyMessage = document.querySelector("#round-empty");
+      const editor = document.querySelector("#round-editor");
+      const numberInput = document.querySelector("#round-number-input");
+      const firstSelect = document.querySelector("#round-player-one");
+      const secondSelect = document.querySelector("#round-player-two");
+      const playerOptions = `<option value="">Odaberi igrača</option>${rankedPlayers.map((player) =>
+        `<option value="${escapeHtml(player.id)}">${escapeHtml(player.name)} · ${player.wins} W</option>`).join("")}`;
+
+      numberDisplay.textContent = longestRound.number === "" ? "—" : longestRound.number;
+      editor.hidden = !editing;
+      numberInput.value = longestRound.number;
+      firstSelect.innerHTML = playerOptions;
+      secondSelect.innerHTML = playerOptions;
+      firstSelect.value = longestRound.firstPlayerId;
+      secondSelect.value = longestRound.secondPlayerId;
+
+      const selectedPlayers = [longestRound.firstPlayerId, longestRound.secondPlayerId]
+        .map((id) => players.find((player) => player.id === id))
+        .filter(Boolean);
+      emptyMessage.hidden = selectedPlayers.length > 0;
+      playerList.innerHTML = selectedPlayers.map((player) => {
+        const title = titleForWins(player.wins);
+        const rank = rankedPlayers.findIndex((entry) => entry.id === player.id) + 1;
+        const isFinalBlow = longestRound.finalBlowPlayerId === player.id;
+        const finalBlowMarker = editing
+          ? `<label class="final-blow-label"><input type="checkbox" data-final-blow="${escapeHtml(player.id)}" aria-label="Final blow: ${escapeHtml(player.name)}" ${isFinalBlow ? "checked" : ""}><span>Deliverao final blow</span></label>`
+          : isFinalBlow ? `<p class="final-blow-display">Deliverao final blow</p>` : "";
+        return `<article class="round-player-card">
+          <div class="round-player-name">${title ? `<span class="round-player-title title-code title-${title.className}">${title.code}</span>` : ""}<span>${escapeHtml(player.name)}</span></div>
+          <div class="round-player-stats"><span class="round-player-rank${title ? ` title-${title.className}` : ""}">Rang #${rank}</span> · ${player.wins} W · ${player.losses} L · ${formatRate(player)}</div>
+          ${finalBlowMarker}
+        </article>`;
+      }).join("");
     }
 
     function render() {
@@ -414,7 +540,23 @@
       emptyState.hidden = players.length > 0;
       document.querySelector("#player-count").textContent = String(players.length);
       document.querySelector("#match-count").textContent = String(players.reduce((total, player) => total + player.wins + player.losses, 0));
-      document.querySelector("#top-rate").textContent = ranked.length ? formatRate(ranked[0]) : "—";
+      const bestPercentagePlayer = [...players].sort((first, second) =>
+        winRate(second) - winRate(first) || second.wins - first.wins || first.name.localeCompare(second.name, "hr"))[0];
+      const topPlayerTitle = document.querySelector("#top-player-title");
+      const topPlayerLine = document.querySelector("#top-player-line");
+      const topRate = document.querySelector("#top-rate");
+      if (bestPercentagePlayer) {
+        const title = titleForWins(bestPercentagePlayer.wins);
+        topPlayerTitle.textContent = title ? title.code : "";
+        topPlayerTitle.className = title ? `top-player-title title-${title.className}` : "top-player-title";
+        topPlayerLine.textContent = `${bestPercentagePlayer.name}: ${bestPercentagePlayer.wins} W`;
+        topRate.textContent = formatRate(bestPercentagePlayer);
+      } else {
+        topPlayerTitle.textContent = "";
+        topPlayerLine.textContent = "—";
+        topRate.textContent = "";
+      }
+      renderLongestRound(ranked);
       document.querySelector("#add-section").hidden = !editing;
       document.querySelector("#actions-heading").hidden = !editing;
       document.querySelector("#board-caption").textContent = editing ? "Uredi rezultate izravno u tablici" : "Poredano po broju pobjeda";
@@ -469,6 +611,41 @@
       document.querySelector("#new-name").focus();
     });
 
+    document.querySelector("#round-editor").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const recordNumber = Number(formData.get("recordNumber"));
+      const firstPlayerId = String(formData.get("playerOne"));
+      const secondPlayerId = String(formData.get("playerTwo"));
+      const roundError = document.querySelector("#round-error");
+      if (!Number.isFinite(recordNumber) || recordNumber < 0) {
+        roundError.textContent = "Upiši ispravan broj rekorda.";
+        return;
+      }
+      if (!firstPlayerId || !secondPlayerId || firstPlayerId === secondPlayerId) {
+        roundError.textContent = "Odaberi dva različita igrača s leaderboarda.";
+        return;
+      }
+      const selectedPlayerIds = [firstPlayerId, secondPlayerId];
+      longestRound = {
+        number: String(formData.get("recordNumber")),
+        firstPlayerId,
+        secondPlayerId,
+        finalBlowPlayerId: selectedPlayerIds.includes(longestRound.finalBlowPlayerId) ? longestRound.finalBlowPlayerId : "",
+      };
+      saveLongestRound();
+      roundError.textContent = "";
+      render();
+    });
+
+    document.querySelector("#round-player-list").addEventListener("change", (event) => {
+      const checkbox = event.target.closest("[data-final-blow]");
+      if (!checkbox) return;
+      longestRound.finalBlowPlayerId = checkbox.checked ? checkbox.dataset.finalBlow : "";
+      saveLongestRound();
+      render();
+    });
+
     boardBody.addEventListener("change", (event) => {
       const input = event.target.closest("[data-field]");
       if (!input) return;
@@ -487,8 +664,13 @@
     boardBody.addEventListener("click", (event) => {
       const button = event.target.closest("[data-delete]");
       if (!button) return;
+      const deletedPlayerId = button.dataset.delete;
       players = players.filter((player) => player.id !== button.dataset.delete);
       savePlayers();
+      if ([longestRound.firstPlayerId, longestRound.secondPlayerId].includes(deletedPlayerId)) {
+        longestRound = { number: "", firstPlayerId: "", secondPlayerId: "", finalBlowPlayerId: "" };
+        saveLongestRound();
+      }
       render();
     });
 
