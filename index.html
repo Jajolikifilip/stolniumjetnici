@@ -129,7 +129,7 @@
 
     .stat { padding: 17px 20px 18px 0; }
     .stat + .stat { padding-left: 22px; border-left: 1px solid var(--line); }
-    .stat-value { display: block; margin-top: 7px; font-family: Georgia, serif; font-size: 27px; }
+    .stat-value { display: block; margin-top: 7px; font-family: Georgia, serif; font-size: 29px; font-weight: 700; }
 
     .section-heading { margin-bottom: 13px; }
     .section-heading h2 { margin: 0; font-family: Georgia, serif; font-size: 23px; font-weight: 400; }
@@ -151,11 +151,11 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .rank { color: var(--muted); font-size: 13px; }
+    .rank { color: var(--muted); font-size: 14px; font-weight: 700; }
     .player-cell { gap: 6px; min-width: 0; font-weight: 700; }
     .player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .record { font-variant-numeric: tabular-nums; }
-    .rate { font-weight: 750; font-variant-numeric: tabular-nums; }
+    .record { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .rate { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .rate-pill { display: inline-block; min-width: 54px; padding: 6px 9px; border-radius: 2px; background: #293a2b; color: var(--green); text-align: center; }
     .title-code { flex: 0 0 auto; font-size: 14px; font-weight: 850; letter-spacing: .04em; }
     .title-t { color: var(--green); }
@@ -235,7 +235,7 @@
       .stats { margin-bottom: 29px; }
       .stat { padding-right: 10px; }
       .stat + .stat { padding-left: 12px; }
-      .stat-value { font-size: 23px; }
+      .stat-value { font-size: 24px; }
       .table-wrap { margin-right: -16px; padding-right: 16px; }
       table { min-width: 610px; }
       .add-form { grid-template-columns: 1fr 1fr; }
@@ -276,7 +276,7 @@
     <section aria-labelledby="leaderboard-title">
       <div class="section-heading">
         <h2 id="leaderboard-title">Leaderboard</h2>
-        <span class="section-caption" id="board-caption">Poredano po postotku pobjeda</span>
+        <span class="section-caption" id="board-caption">Poredano po broju pobjeda</span>
       </div>
       <div class="table-wrap">
         <table>
@@ -407,7 +407,7 @@
 
     function render() {
       const ranked = [...players].sort((first, second) =>
-        winRate(second) - winRate(first) || second.wins - first.wins || first.name.localeCompare(second.name, "hr"));
+        second.wins - first.wins || winRate(second) - winRate(first) || first.name.localeCompare(second.name, "hr"));
       boardBody.innerHTML = ranked.map(renderPlayerRow).join("");
 
       emptyState.hidden = players.length > 0;
@@ -416,7 +416,7 @@
       document.querySelector("#top-rate").textContent = ranked.length ? formatRate(ranked[0]) : "—";
       document.querySelector("#add-section").hidden = !editing;
       document.querySelector("#actions-heading").hidden = !editing;
-      document.querySelector("#board-caption").textContent = editing ? "Uredi rezultate izravno u tablici" : "Poredano po postotku pobjeda";
+      document.querySelector("#board-caption").textContent = editing ? "Uredi rezultate izravno u tablici" : "Poredano po broju pobjeda";
     }
 
     function setEditing(value) {
