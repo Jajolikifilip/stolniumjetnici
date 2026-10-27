@@ -635,7 +635,7 @@
 
       emptyState.hidden = players.length > 0;
       document.querySelector("#player-count").textContent = String(players.length);
-      document.querySelector("#match-count").textContent = String(players.reduce((total, player) => total + player.wins + player.losses, 0));
+      document.querySelector("#match-count").textContent = String(players.reduce((total, player) => total + player.wins, 0));
       const bestPercentagePlayer = [...players].sort((first, second) =>
         winRate(second) - winRate(first) || second.wins - first.wins || first.name.localeCompare(second.name, "hr"))[0];
       const topPlayerTitle = document.querySelector("#top-player-title");
