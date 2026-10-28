@@ -629,7 +629,7 @@
 
     function render() {
       const ranked = [...players].sort((first, second) =>
-        second.wins - first.wins || first.name.localeCompare(second.name, "hr"));
+        second.wins - first.wins || winRate(second) - winRate(first) || first.name.localeCompare(second.name, "hr"));
       document.querySelector("#leaderboard-table").classList.toggle("editing", editing);
       boardBody.innerHTML = ranked.map(renderPlayerRow).join("");
 
