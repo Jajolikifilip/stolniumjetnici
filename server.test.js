@@ -9,6 +9,7 @@ process.env.SESSION_SECRET = "0123456789abcdef0123456789abcdef0123456789abcdef";
 let sharedRow;
 const periodRows = new Map();
 const matches = [];
+const results = [];
 const archives = [];
 
 class TestPool {
@@ -46,6 +47,16 @@ class TestPool {
       const column = query.match(/WHERE (daily_key|weekly_key|monthly_key) = \$1/)[1];
       return { rows: matches.filter((match) => match[column] === values[0]).map((match) => ({ ...match })) };
     }
+    if (query.includes("FROM leaderboard_results WHERE") && /WHERE (daily_key|weekly_key|monthly_key) = \$1/.test(query)) {
+      const column = query.match(/WHERE (daily_key|weekly_key|monthly_key) = \$1/)[1];
+      return { rows: results.filter((result) => result[column] === values[0] && !result.voided).map((result) => ({ ...result })) };
+    }
+    if (query.includes("WITH latest_result AS")) {
+      const index = results.findLastIndex((result) => result.player_id === values[0] && !result.voided && result.result_type === (query.includes("'win'") ? "win" : "loss"));
+      if (index < 0) return { rows: [] };
+      results[index].voided = true;
+      return { rows: [{ id: results[index].id }] };
+    }
     if (query.includes("INSERT INTO leaderboard_matches")) {
       matches.push({
         id: values[0],
@@ -59,6 +70,13 @@ class TestPool {
         daily_key: values[8],
         weekly_key: values[9],
         monthly_key: values[10],
+      });
+      return { rows: [] };
+    }
+    if (query.includes("INSERT INTO leaderboard_results")) {
+      results.push({
+        id: values[0], player_id: values[1], player_name: values[2], result_type: values[3], all_time_wins: values[4],
+        played_at: values[5], daily_key: values[6], weekly_key: values[7], monthly_key: values[8], source_match_id: values[9], voided: false,
       });
       return { rows: [] };
     }
@@ -172,13 +190,57 @@ test("shared period rankings require admin-authenticated match results", async (
   assert.equal(result.state.players.find((player) => player.id === "ante").wins, 10);
   assert.equal(result.state.players.find((player) => player.id === "damir").losses, 2);
   assert.equal(result.categories.daily.players.find((player) => player.id === "ante").wins, 1);
-  assert.equal(result.categories.daily.players.find((player) => player.id === "ante").titleWins, 10);
   assert.equal(result.categories.daily.players.find((player) => player.id === "damir").losses, 1);
 
+  const editedAllTimeState = {
+    ...result.state,
+    players: result.state.players.map((player) => player.id === "ante" ? { ...player, wins: 11 } : player),
+  };
+  response = await fetch(`${url}/api/state`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(editedAllTimeState),
+  });
+  assert.equal(response.status, 200);
+
+  response = await fetch(`${url}/api/state`);
+  const editedResult = await response.json();
+  const dailyAnte = editedResult.categories.daily.players.find((player) => player.id === "ante");
+  assert.equal(dailyAnte.wins, 2);
+  assert.equal(dailyAnte.titleWins, 11);
+  const editedLossState = {
+    ...editedResult.state,
+    players: editedResult.state.players.map((player) => player.id === "damir" ? { ...player, losses: 3 } : player),
+  };
+  response = await fetch(`${url}/api/state`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(editedLossState),
+  });
+  assert.equal(response.status, 200);
+  response = await fetch(`${url}/api/state`);
+  const editedLossResult = await response.json();
+  assert.equal(editedLossResult.categories.daily.players.find((player) => player.id === "damir").losses, 2);
+  const correctedAllTimeState = {
+    ...editedLossResult.state,
+    players: editedLossResult.state.players.map((player) => player.id === "ante" ? { ...player, wins: 10 } : player),
+  };
+  response = await fetch(`${url}/api/state`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(correctedAllTimeState),
+  });
+  assert.equal(response.status, 200);
+  response = await fetch(`${url}/api/state`);
+  const correctedResult = await response.json();
+  assert.equal(correctedResult.categories.daily.players.find((player) => player.id === "ante").wins, 1);
+
+  state.players[0].wins = 10;
+  state.players[1].losses = 3;
+
   periodRows.set("daily", { period_type: "daily", period_key: "2026-10-29", cycle_number: 2 });
-  matches.push({
-    winner_player_id: "ante", winner_name: "Ante", winner_all_time_wins: 10,
-    loser_player_id: "damir", loser_name: "Damir", loser_all_time_wins: 5,
+  results.push({
+    player_id: "ante", player_name: "Ante", result_type: "win", all_time_wins: 11,
     daily_key: "2026-10-29", weekly_key: "2026-10-26", monthly_key: "2026-10",
   });
   const pool = new TestPool();
@@ -186,7 +248,7 @@ test("shared period rankings require admin-authenticated match results", async (
   await advancePeriods(pool, state.players, tomorrowInZagreb);
   const dailyArchive = archives.find((archive) => archive.period_type === "daily" && archive.period_key === "2026-10-29");
   assert.equal(dailyArchive.winner_player_id, "ante");
-  assert.equal(dailyArchive.leaderboard[0].titleWins, 10);
+  assert.equal(dailyArchive.leaderboard[0].titleWins, 11);
 
   await advancePeriods(pool, state.players, tomorrowInZagreb);
   assert.equal(archives.filter((archive) => archive.period_type === "daily" && archive.period_key === "2026-10-29").length, 1);
@@ -200,5 +262,5 @@ test("shared period rankings require admin-authenticated match results", async (
   response = await fetch(`${url}/api/archives/${badge.id}`);
   assert.equal(response.status, 200);
   const archivedLeaderboard = await response.json();
-  assert.equal(archivedLeaderboard.leaderboard[0].titleWins, 10);
+  assert.equal(archivedLeaderboard.leaderboard[0].titleWins, 11);
 });

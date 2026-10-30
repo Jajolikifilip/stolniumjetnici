@@ -264,6 +264,7 @@
     .add-section { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
     .add-section[hidden] { display: none; }
     .add-section h2 { margin: 0 0 17px; font-family: Georgia, serif; font-size: 21px; font-weight: 400; }
+    .all-time-edit-note { margin: -7px 0 16px; color: var(--muted); font-size: 12px; line-height: 1.5; }
     .add-form { display: grid; grid-template-columns: minmax(180px, 1fr) 110px 110px auto; align-items: end; gap: 12px; }
     .field label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
     .field input { width: 100%; height: 42px; padding: 0 11px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); color: var(--ink); }
@@ -365,6 +366,7 @@
       .add-form { grid-template-columns: 1fr 1fr; }
       .field:first-child { grid-column: 1 / -1; }
       .primary-button { grid-column: 1 / -1; }
+      .all-time-edit-note { margin-top: -6px; }
       .section-caption { max-width: 150px; text-align: right; }
     }
 
@@ -440,6 +442,7 @@
 
     <section class="add-section" id="add-section" aria-labelledby="add-title" hidden>
       <h2 id="add-title">Dodaj igrača</h2>
+      <p class="all-time-edit-note">W/L uređuješ u All Time. Svako povećanje automatski ulazi u Daily, Weekly i Monthly.</p>
       <form class="add-form" id="add-form">
         <div class="field"><label for="new-name">Ime</label><input id="new-name" name="name" maxlength="50" autocomplete="off" required></div>
         <div class="field"><label for="new-wins">W · pobjede</label><input id="new-wins" name="wins" type="number" min="0" step="1" value="0" required></div>
@@ -591,6 +594,7 @@
         }
         if (!response.ok) throw new Error(result.error || "Rezultati nisu sinkronizirani.");
         sharedStateInitialized = true;
+        await loadSharedState();
         setSyncStatus("Rezultati su sinkronizirani za sve posjetitelje.", "ok");
         return true;
       }).catch((error) => {
@@ -667,6 +671,7 @@
 
     function renderPlayerRow(player, index) {
       const title = titleForWins(player.titleWins ?? player.wins);
+      const editingAllTime = editing && selectedCategory === "all-time";
       return `
         <tr>
           <td class="rank${title ? ` title-${title.className}` : ""}" data-label="#">${index + 1}</td>
@@ -675,10 +680,10 @@
             : ""}${editing
             ? `<input class="edit-input name-input" aria-label="Ime igrača" data-id="${escapeHtml(player.id)}" data-field="name" maxlength="50" value="${escapeHtml(player.name)}">`
             : `<button class="player-name" type="button" data-profile="${escapeHtml(player.id)}">${escapeHtml(player.name)}</button>`}</div></td>
-          <td class="record" data-label="W">${editing
+          <td class="record" data-label="W">${editingAllTime
             ? `<input class="edit-input" aria-label="Pobjede igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="wins" type="number" min="0" step="1" value="${player.wins}">`
             : player.wins}</td>
-          <td class="record" data-label="L">${editing
+          <td class="record" data-label="L">${editingAllTime
             ? `<input class="edit-input" aria-label="Porazi igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="losses" type="number" min="0" step="1" value="${player.losses}">`
             : player.losses}</td>
           <td class="rate" data-label="Postotak"><span class="rate-pill">${formatRate(player)}</span></td>

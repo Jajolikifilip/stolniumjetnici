@@ -121,27 +121,33 @@ function rankPlayers(players) {
 async function getPeriodLeaderboard(client, type, periodKey, players) {
   const column = periodColumns[type];
   const result = await client.query(
-        `SELECT winner_player_id, winner_name, winner_all_time_wins,
-          loser_player_id, loser_name, loser_all_time_wins
-     FROM leaderboard_matches WHERE ${column} = $1`,
+    `SELECT player_id, player_name, result_type, all_time_wins
+     FROM leaderboard_results WHERE ${column} = $1 AND NOT voided ORDER BY played_at, id`,
     [periodKey],
   );
   const scores = new Map(players.map((player) => [player.id, { ...player, titleWins: player.wins, wins: 0, losses: 0 }]));
 
-  for (const match of result.rows) {
-    if (!scores.has(match.winner_player_id)) {
-      scores.set(match.winner_player_id, { id: match.winner_player_id, name: match.winner_name, titleWins: match.winner_all_time_wins, wins: 0, losses: 0 });
+  for (const outcome of result.rows) {
+    if (!scores.has(outcome.player_id)) {
+      scores.set(outcome.player_id, { id: outcome.player_id, name: outcome.player_name, titleWins: outcome.all_time_wins, wins: 0, losses: 0 });
     }
-    if (!scores.has(match.loser_player_id)) {
-      scores.set(match.loser_player_id, { id: match.loser_player_id, name: match.loser_name, titleWins: match.loser_all_time_wins, wins: 0, losses: 0 });
-    }
-    scores.get(match.winner_player_id).wins += 1;
-    scores.get(match.loser_player_id).losses += 1;
-    scores.get(match.winner_player_id).titleWins = Math.max(scores.get(match.winner_player_id).titleWins || 0, match.winner_all_time_wins);
-    scores.get(match.loser_player_id).titleWins = Math.max(scores.get(match.loser_player_id).titleWins || 0, match.loser_all_time_wins);
+    const player = scores.get(outcome.player_id);
+    if (outcome.result_type === "win") player.wins += 1;
+    else player.losses += 1;
+    player.titleWins = Math.max(player.titleWins || 0, outcome.all_time_wins);
   }
 
   return rankPlayers([...scores.values()]);
+}
+
+async function insertOutcome(client, player, resultType, allTimeWins, occurredAt = new Date(), sourceMatchId = null) {
+  await client.query(
+    `INSERT INTO leaderboard_results
+       (id, player_id, player_name, result_type, all_time_wins, played_at, daily_key, weekly_key, monthly_key, source_match_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [crypto.randomUUID(), player.id, player.name, resultType, allTimeWins, occurredAt,
+      keyForPeriod("daily", occurredAt), keyForPeriod("weekly", occurredAt), keyForPeriod("monthly", occurredAt), sourceMatchId],
+  );
 }
 
 async function advancePeriods(client, players, now = new Date()) {
@@ -280,16 +286,79 @@ app.put("/api/state", async (request, response, next) => {
   const state = validateState(request.body);
   if (!state) return response.status(400).json({ error: "Podatci nisu ispravni." });
 
+  const client = await pool.connect();
   try {
-    await pool.query(
+    await client.query("BEGIN");
+    const previousResult = await client.query("SELECT data, initialized FROM leaderboard_state WHERE id = 1 FOR UPDATE");
+    const previousRow = previousResult.rows[0];
+    if (previousRow && previousRow.initialized) {
+      const previousState = validateState(previousRow.data);
+      const previousPlayers = new Map((previousState ? previousState.players : []).map((player) => [player.id, player]));
+      const now = new Date();
+      await advancePeriods(client, previousState.players, now);
+
+      for (const player of state.players) {
+        const previous = previousPlayers.get(player.id) || { wins: 0, losses: 0 };
+        const winDelta = player.wins - previous.wins;
+        const lossDelta = player.losses - previous.losses;
+        if (Math.abs(winDelta) > 500 || Math.abs(lossDelta) > 500) {
+          await client.query("ROLLBACK");
+          return response.status(400).json({ error: "Promijeni najviše 500 rezultata po spremanju." });
+        }
+
+        for (let index = 0; index < winDelta; index += 1) {
+          await insertOutcome(client, player, "win", previous.wins + index + 1, now);
+        }
+        for (let index = 0; index < lossDelta; index += 1) {
+          await insertOutcome(client, player, "loss", player.wins, now);
+        }
+
+        for (let index = 0; index < Math.abs(Math.min(winDelta, 0)); index += 1) {
+          const removed = await client.query(
+            `WITH latest_result AS (
+               SELECT id FROM leaderboard_results
+               WHERE player_id = $1 AND result_type = 'win'
+               ORDER BY played_at DESC, id DESC LIMIT 1 FOR UPDATE
+             )
+             UPDATE leaderboard_results SET voided = TRUE WHERE id = (SELECT id FROM latest_result) RETURNING id`,
+            [player.id],
+          );
+          if (!removed.rows.length) {
+            await client.query("ROLLBACK");
+            return response.status(409).json({ error: "Ne mogu smanjiti W ispod početnog All Time stanja." });
+          }
+        }
+        for (let index = 0; index < Math.abs(Math.min(lossDelta, 0)); index += 1) {
+          const removed = await client.query(
+            `WITH latest_result AS (
+               SELECT id FROM leaderboard_results
+               WHERE player_id = $1 AND result_type = 'loss'
+               ORDER BY played_at DESC, id DESC LIMIT 1 FOR UPDATE
+             )
+             UPDATE leaderboard_results SET voided = TRUE WHERE id = (SELECT id FROM latest_result) RETURNING id`,
+            [player.id],
+          );
+          if (!removed.rows.length) {
+            await client.query("ROLLBACK");
+            return response.status(409).json({ error: "Ne mogu smanjiti L ispod početnog All Time stanja." });
+          }
+        }
+      }
+    }
+
+    await client.query(
       `INSERT INTO leaderboard_state (id, data, initialized, updated_at)
        VALUES (1, $1::jsonb, TRUE, NOW())
        ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, initialized = TRUE, updated_at = NOW()`,
       [JSON.stringify(state)],
     );
+    await client.query("COMMIT");
     response.json({ ok: true });
   } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
     next(error);
+  } finally {
+    client.release();
   }
 });
 
@@ -322,16 +391,20 @@ app.post("/api/matches", async (request, response, next) => {
 
     const playedAt = new Date();
     await advancePeriods(client, state.players, playedAt);
+    const winnerAllTimeWins = winner.wins + 1;
+    const matchId = crypto.randomUUID();
     await client.query(
       `INSERT INTO leaderboard_matches
          (id, winner_player_id, winner_name, winner_all_time_wins, loser_player_id, loser_name,
           loser_all_time_wins, played_at, daily_key, weekly_key, monthly_key)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [crypto.randomUUID(), winner.id, winner.name, winner.wins + 1, loser.id, loser.name, loser.wins, playedAt,
+      [matchId, winner.id, winner.name, winnerAllTimeWins, loser.id, loser.name, loser.wins, playedAt,
         keyForPeriod("daily", playedAt), keyForPeriod("weekly", playedAt), keyForPeriod("monthly", playedAt)],
     );
-    winner.wins += 1;
+    winner.wins = winnerAllTimeWins;
     loser.losses += 1;
+    await insertOutcome(client, winner, "win", winner.wins, playedAt, matchId);
+    await insertOutcome(client, loser, "loss", loser.wins, playedAt, matchId);
     await client.query(
       "UPDATE leaderboard_state SET data = $1::jsonb, updated_at = NOW() WHERE id = 1",
       [JSON.stringify(state)],
@@ -381,6 +454,42 @@ async function start() {
   await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_matches_daily_idx ON leaderboard_matches (daily_key)");
   await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_matches_weekly_idx ON leaderboard_matches (weekly_key)");
   await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_matches_monthly_idx ON leaderboard_matches (monthly_key)");
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS leaderboard_results (
+      id uuid PRIMARY KEY,
+      player_id text NOT NULL,
+      player_name text NOT NULL,
+      result_type text NOT NULL CHECK (result_type IN ('win', 'loss')),
+      all_time_wins integer NOT NULL CHECK (all_time_wins >= 0),
+      played_at timestamptz NOT NULL,
+      daily_key text NOT NULL,
+      weekly_key text NOT NULL,
+      monthly_key text NOT NULL,
+      source_match_id uuid,
+      voided boolean NOT NULL DEFAULT FALSE,
+      UNIQUE (source_match_id, result_type)
+    )
+  `);
+  await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_results_daily_idx ON leaderboard_results (daily_key)");
+  await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_results_weekly_idx ON leaderboard_results (weekly_key)");
+  await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_results_monthly_idx ON leaderboard_results (monthly_key)");
+  await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_results_player_idx ON leaderboard_results (player_id, result_type, played_at DESC)");
+  await pool.query(`
+    INSERT INTO leaderboard_results
+      (id, player_id, player_name, result_type, all_time_wins, played_at, daily_key, weekly_key, monthly_key, source_match_id)
+    SELECT md5(id::text || ':win')::uuid, winner_player_id, winner_name, 'win', winner_all_time_wins,
+           played_at, daily_key, weekly_key, monthly_key, id
+    FROM leaderboard_matches
+    ON CONFLICT (source_match_id, result_type) DO NOTHING
+  `);
+  await pool.query(`
+    INSERT INTO leaderboard_results
+      (id, player_id, player_name, result_type, all_time_wins, played_at, daily_key, weekly_key, monthly_key, source_match_id)
+    SELECT md5(id::text || ':loss')::uuid, loser_player_id, loser_name, 'loss', loser_all_time_wins,
+           played_at, daily_key, weekly_key, monthly_key, id
+    FROM leaderboard_matches
+    ON CONFLICT (source_match_id, result_type) DO NOTHING
+  `);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS leaderboard_periods (
       period_type text PRIMARY KEY CHECK (period_type IN ('daily', 'weekly', 'monthly')),
