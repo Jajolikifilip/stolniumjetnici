@@ -159,6 +159,46 @@
     .round-editor select:focus { outline: 2px solid var(--green-dark); outline-offset: 1px; }
     .round-editor .primary-button { min-width: 125px; }
 
+    .period-navigation { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 26px; }
+    .period-tab { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 4px 11px; min-height: 76px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--ink); text-align: left; }
+    .period-tab:hover { border-color: #667653; }
+    .period-tab[aria-pressed="true"] { border-color: var(--green); background: #18221b; box-shadow: inset 0 -2px var(--green); }
+    .period-symbol { grid-row: span 2; display: grid; width: 36px; height: 36px; place-items: center; color: #141512; font-size: 15px; font-weight: 900; }
+    .period-symbol-daily { clip-path: polygon(50% 0, 100% 100%, 0 100%); background: #a77a4b; padding-top: 9px; }
+    .period-symbol-weekly { clip-path: polygon(50% 0, 62% 16%, 89% 7%, 82% 32%, 100% 49%, 81% 63%, 90% 92%, 61% 83%, 50% 100%, 39% 83%, 10% 92%, 19% 63%, 0 49%, 18% 32%, 11% 7%, 38% 16%); background: #f08a32; }
+    .period-symbol-monthly { clip-path: polygon(0 100%, 8% 7%, 34% 27%, 50% 0, 66% 27%, 92% 7%, 100% 100%); background: #c83e49; padding-top: 7px; }
+    .period-symbol-all-time { border: 2px solid #78bcff; border-radius: 50%; color: #78bcff; font-size: 22px; }
+    .period-tab-title { min-width: 0; font-size: 13px; font-weight: 800; }
+    .period-cycle { margin-left: 5px; color: var(--muted); font-size: 10px; font-weight: 650; }
+    .period-countdown { grid-column: 2; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .category-description { margin: -14px 0 18px; color: var(--muted); font-size: 12px; }
+
+    .match-entry { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .match-entry[hidden] { display: none; }
+    .match-entry h3 { margin: 0 0 6px; font-family: Georgia, serif; font-size: 19px; font-weight: 400; }
+    .match-entry-note { margin: 0 0 14px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .match-form { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto; align-items: end; gap: 12px; }
+    .match-form .primary-button { min-width: 140px; }
+    .match-form-error { grid-column: 1 / -1; min-height: 16px; margin: 0; color: var(--red); font-size: 12px; }
+
+    .profile-summary { margin: 0 0 18px; color: var(--muted); line-height: 1.5; }
+    .profile-section-title { margin: 20px 0 10px; padding-top: 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .profile-periods, .profile-badges { display: grid; gap: 8px; }
+    .profile-period-row, .profile-badge { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 2px; background: var(--paper); }
+    .profile-period-name, .profile-badge-label { font-size: 12px; font-weight: 750; }
+    .profile-period-score { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .profile-badge { width: 100%; color: var(--ink); cursor: pointer; text-align: left; }
+    .profile-badge .period-symbol { grid-row: auto; width: 28px; height: 28px; flex: 0 0 28px; font-size: 11px; }
+    .profile-badge:hover { border-color: var(--green); }
+    .profile-badge-name { display: block; color: var(--green); font-size: 12px; font-weight: 800; }
+    .profile-badge-period { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .archive-winner { margin: 0 0 14px; color: var(--green); font-weight: 750; }
+    .archive-list { display: grid; gap: 7px; max-height: 48vh; overflow-y: auto; }
+    .archive-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) repeat(3, auto); align-items: center; gap: 8px; padding: 10px; border-top: 1px solid var(--line); font-size: 12px; }
+    .archive-rank { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .archive-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 750; }
+    .archive-stat { color: var(--muted); font-variant-numeric: tabular-nums; }
+
     .section-heading { margin-bottom: 13px; }
     .section-heading h2 { margin: 0; font-family: Georgia, serif; font-size: 23px; font-weight: 400; }
     .section-caption { color: var(--muted); font-size: 13px; }
@@ -181,7 +221,8 @@
 
     .rank { color: var(--muted); font-size: 16px; font-weight: 800; }
     .player-cell { gap: 6px; min-width: 0; font-weight: 700; }
-    .player-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .player-name { min-width: 0; overflow: hidden; padding: 0; border: 0; background: transparent; color: var(--ink); font: inherit; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+    .player-name:hover { color: var(--green); text-decoration: underline; }
     .record { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .rate { font-size: 18px; font-weight: 850; font-variant-numeric: tabular-nums; }
     .rate-pill { display: inline-block; min-width: 54px; padding: 6px 9px; border-radius: 2px; background: #293a2b; color: var(--green); text-align: center; }
@@ -278,6 +319,19 @@
       .round-player-card { padding: 13px; }
       .round-editor { grid-template-columns: 1fr 1fr; }
       .round-editor .field:first-child, .round-editor .primary-button { grid-column: 1 / -1; }
+      .period-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-bottom: 20px; }
+      .period-tab { grid-template-columns: 30px minmax(0, 1fr); gap: 3px 8px; min-height: 66px; padding: 8px; }
+      .period-symbol { width: 29px; height: 29px; font-size: 13px; }
+      .period-symbol-all-time { font-size: 19px; }
+      .period-tab-title { font-size: 12px; }
+      .period-cycle { display: block; margin: 2px 0 0; }
+      .period-countdown { font-size: 10px; }
+      .match-form { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .match-form .primary-button { grid-column: 1 / -1; }
+      .archive-row { grid-template-columns: 22px minmax(0, 1fr) repeat(3, auto); gap: 5px; padding: 8px 3px; font-size: 10px; }
+      .archive-stat { font-size: 10px; }
+      .profile-period-row, .profile-badge { gap: 7px; padding: 8px; }
+      .profile-period-name, .profile-period-score, .profile-badge-name { font-size: 11px; }
       .table-wrap { margin-right: 0; padding-right: 0; overflow-x: hidden; }
       table { display: table; width: 100%; min-width: 0; table-layout: fixed; }
       thead { position: static; width: auto; height: auto; padding: 0; margin: 0; overflow: visible; clip: auto; white-space: normal; }
@@ -343,6 +397,14 @@
       <div class="stat"><span class="stat-label">Najbolji postotak</span><div class="top-player-stat"><span class="top-player-detail" id="top-player-detail"><span class="top-player-title" id="top-player-title"></span><span id="top-player-line">—</span></span><strong class="top-rate" id="top-rate"></strong></div></div>
     </section>
 
+    <nav class="period-navigation" id="period-navigation" aria-label="Kategorije leaderboarda">
+      <button class="period-tab" type="button" data-period="daily" aria-pressed="false"><span class="period-symbol period-symbol-daily">D</span><span class="period-tab-title">Daily<span class="period-cycle" data-cycle="daily">#1</span></span><span class="period-countdown" data-countdown="daily">--:--:--</span></button>
+      <button class="period-tab" type="button" data-period="weekly" aria-pressed="false"><span class="period-symbol period-symbol-weekly">W</span><span class="period-tab-title">Weekly<span class="period-cycle" data-cycle="weekly">#1</span></span><span class="period-countdown" data-countdown="weekly">--d --:--:--</span></button>
+      <button class="period-tab" type="button" data-period="monthly" aria-pressed="false"><span class="period-symbol period-symbol-monthly">M</span><span class="period-tab-title">Monthly<span class="period-cycle" data-cycle="monthly">#1</span></span><span class="period-countdown" data-countdown="monthly">--d --:--:--</span></button>
+      <button class="period-tab" type="button" data-period="all-time" aria-pressed="true"><span class="period-symbol period-symbol-all-time">∞</span><span class="period-tab-title">All Time<span class="period-cycle">Zauvijek</span></span></button>
+    </nav>
+    <p class="category-description" id="category-description">Ukupni rezultati za sva vremena.</p>
+
     <section class="longest-round-section" aria-labelledby="longest-round-title">
       <div class="longest-round-card">
         <div class="record-header">
@@ -384,6 +446,16 @@
         <div class="field"><label for="new-losses">L · porazi</label><input id="new-losses" name="losses" type="number" min="0" step="1" value="0" required></div>
         <button class="primary-button" type="submit">Dodaj igrača</button>
       </form>
+      <div class="match-entry" id="match-entry">
+        <h3>Upiši rezultat utakmice</h3>
+        <p class="match-entry-note">Odaberi pobjednika i protivnika. Rezultat se odmah uračunava u sve aktivne kategorije.</p>
+        <form class="match-form" id="match-form">
+          <div class="field"><label for="match-winner">Pobjednik</label><select id="match-winner" name="winnerPlayerId" required></select></div>
+          <div class="field"><label for="match-loser">Protivnik</label><select id="match-loser" name="loserPlayerId" required></select></div>
+          <button class="primary-button" type="submit">Zapiši utakmicu</button>
+          <p class="match-form-error" id="match-error" role="alert"></p>
+        </form>
+      </div>
     </section>
 
     <footer>Postotak pobjeda = W ÷ (W + L). Rezultati se dijele sa svim posjetiteljima.<span class="sync-status" id="sync-status" role="status">Spajanje sa zajedničkim rezultatima...</span></footer>
@@ -416,6 +488,25 @@
     <div class="dialog-actions"><button class="cancel-button" id="close-titles" type="button">Zatvori</button></div>
   </dialog>
 
+  <dialog id="profile-dialog" aria-labelledby="profile-name">
+    <div class="dialog-eyebrow">Profil igrača</div>
+    <h2 id="profile-name"></h2>
+    <p class="profile-summary" id="profile-summary"></p>
+    <div class="profile-section-title">Aktivne ljestvice</div>
+    <div class="profile-periods" id="profile-periods"></div>
+    <div class="profile-section-title">Značke pobjednika</div>
+    <div class="profile-badges" id="profile-badges"></div>
+    <div class="dialog-actions"><button class="cancel-button" id="close-profile" type="button">Zatvori</button></div>
+  </dialog>
+
+  <dialog id="archive-dialog" aria-labelledby="archive-title">
+    <div class="dialog-eyebrow">Arhivirana ljestvica</div>
+    <h2 id="archive-title"></h2>
+    <p class="archive-winner" id="archive-winner"></p>
+    <div class="archive-list" id="archive-list"></div>
+    <div class="dialog-actions"><button class="cancel-button" id="close-archive" type="button">Zatvori</button></div>
+  </dialog>
+
   <script>
     const STORAGE_KEY = "stolniumjetnici-leaderboard-v1";
     const LONGEST_ROUND_STORAGE_KEY = "stolniumjetnici-longest-round-v1";
@@ -433,6 +524,10 @@
     let sharedStateInitialized = false;
     let sharedStateLoaded = false;
     let saveQueue = Promise.resolve();
+    let categoryData = {};
+    let archives = [];
+    let selectedCategory = "all-time";
+    let countdownRefreshPending = false;
     let players = localBackup.players.map((player) => ({ ...player }));
     let longestRound = { ...localBackup.longestRound };
 
@@ -519,6 +614,8 @@
         const result = await response.json().catch(() => ({}));
         if (!response.ok || !result.state) throw new Error(result.error || "Zajednički rezultati nisu dostupni.");
 
+        categoryData = result.categories || {};
+        archives = Array.isArray(result.archives) ? result.archives : [];
         sharedStateInitialized = Boolean(result.initialized);
         if (sharedStateInitialized) {
           players = Array.isArray(result.state.players) ? result.state.players : [];
@@ -569,7 +666,7 @@
     }
 
     function renderPlayerRow(player, index) {
-      const title = titleForWins(player.wins);
+      const title = titleForWins(player.titleWins ?? player.wins);
       return `
         <tr>
           <td class="rank${title ? ` title-${title.className}` : ""}" data-label="#">${index + 1}</td>
@@ -577,7 +674,7 @@
             ? `<span class="title-code title-${title.className}" title="${title.name}" aria-label="Titula: ${title.name}">${title.code}</span>`
             : ""}${editing
             ? `<input class="edit-input name-input" aria-label="Ime igrača" data-id="${escapeHtml(player.id)}" data-field="name" maxlength="50" value="${escapeHtml(player.name)}">`
-            : `<span class="player-name">${escapeHtml(player.name)}</span>`}</div></td>
+            : `<button class="player-name" type="button" data-profile="${escapeHtml(player.id)}">${escapeHtml(player.name)}</button>`}</div></td>
           <td class="record" data-label="W">${editing
             ? `<input class="edit-input" aria-label="Pobjede igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="wins" type="number" min="0" step="1" value="${player.wins}">`
             : player.wins}</td>
@@ -627,9 +724,128 @@
       }).join("");
     }
 
-    function render() {
-      const ranked = [...players].sort((first, second) =>
+    function rankPlayers(entries) {
+      return [...entries].sort((first, second) =>
         second.wins - first.wins || winRate(second) - winRate(first) || first.name.localeCompare(second.name, "hr"));
+    }
+
+    function renderCategoryNavigation() {
+      document.querySelectorAll(".period-tab[data-period]").forEach((button) => {
+        const type = button.dataset.period;
+        button.setAttribute("aria-pressed", String(type === selectedCategory));
+        const cycle = button.querySelector(`[data-cycle="${type}"]`);
+        if (cycle && categoryData[type]) cycle.textContent = `#${categoryData[type].cycleNumber}`;
+      });
+
+      const descriptions = {
+        daily: "Dnevni rezultati, resetiraju se u ponoć po vremenu Europe/Zagreb.",
+        weekly: "Tjedni rezultati, novi ciklus počinje ponedjeljkom.",
+        monthly: "Mjesečni rezultati, novi ciklus počinje prvog dana mjeseca.",
+        "all-time": "Ukupni rezultati za sva vremena.",
+      };
+      document.querySelector("#category-description").textContent = descriptions[selectedCategory];
+      document.querySelector("#board-caption").textContent = "Poredano po W, pa po postotku pobjeda";
+    }
+
+    function updateCountdowns() {
+      let needsRefresh = false;
+      for (const type of ["daily", "weekly", "monthly"]) {
+        const display = document.querySelector(`[data-countdown="${type}"]`);
+        const endsAt = categoryData[type] && Date.parse(categoryData[type].endsAt);
+        if (!endsAt) continue;
+        const remaining = Math.max(0, Math.floor((endsAt - Date.now()) / 1000));
+        const days = Math.floor(remaining / 86400);
+        const hours = String(Math.floor((remaining % 86400) / 3600)).padStart(2, "0");
+        const minutes = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
+        const seconds = String(remaining % 60).padStart(2, "0");
+        display.textContent = type === "daily" ? `${hours}:${minutes}:${seconds}` : `${days}d ${hours}:${minutes}:${seconds}`;
+        if (remaining === 0) needsRefresh = true;
+      }
+
+      if (needsRefresh && !countdownRefreshPending) {
+        countdownRefreshPending = true;
+        loadSharedState().finally(() => { countdownRefreshPending = false; });
+      }
+    }
+
+    function renderMatchSelectors(rankedPlayers) {
+      const options = `<option value="">Odaberi igrača</option>${rankedPlayers.map((player) =>
+        `<option value="${escapeHtml(player.id)}">${escapeHtml(player.name)} · ${player.wins} W</option>`).join("")}`;
+      const winnerSelect = document.querySelector("#match-winner");
+      const loserSelect = document.querySelector("#match-loser");
+      const oldWinner = winnerSelect.value;
+      const oldLoser = loserSelect.value;
+      winnerSelect.innerHTML = options;
+      loserSelect.innerHTML = options;
+      winnerSelect.value = rankedPlayers.some((player) => player.id === oldWinner) ? oldWinner : "";
+      loserSelect.value = rankedPlayers.some((player) => player.id === oldLoser) ? oldLoser : "";
+      document.querySelector("#match-form button[type=submit]").disabled = rankedPlayers.length < 2;
+    }
+
+    function openPlayerProfile(playerId) {
+      const player = players.find((entry) => entry.id === playerId);
+      if (!player) return;
+      const title = titleForWins(player.wins);
+      const profileName = document.querySelector("#profile-name");
+      profileName.innerHTML = `${title ? `<span class="title-code title-${title.className}">${title.code}</span> ` : ""}${escapeHtml(player.name)}`;
+      document.querySelector("#profile-summary").textContent = `${player.wins} W · ${player.losses} L · ${formatRate(player)} pobjeda ukupno`;
+
+      const periodLabels = { daily: "Daily", weekly: "Weekly", monthly: "Monthly", "all-time": "All Time" };
+      document.querySelector("#profile-periods").innerHTML = Object.entries(periodLabels).map(([type, label]) => {
+        const leaderboard = type === "all-time" ? rankPlayers(players) : categoryData[type]?.players || [];
+        const index = leaderboard.findIndex((entry) => entry.id === playerId);
+        const result = leaderboard[index];
+        return `<div class="profile-period-row"><span class="profile-period-name">${label}</span><span class="profile-period-score">${result ? `#${index + 1} · ${result.wins} W · ${formatRate(result)}` : "Bez rezultata"}</span></div>`;
+      }).join("");
+
+      const playerBadges = archives.filter((archive) => archive.winner_player_id === playerId);
+      const badgesContainer = document.querySelector("#profile-badges");
+      badgesContainer.innerHTML = playerBadges.length ? playerBadges.map((archive) => `
+        <button class="profile-badge" type="button" data-archive-id="${escapeHtml(archive.id)}">
+          <span><span class="profile-badge-name">${escapeHtml(periodLabels[archive.period_type] || archive.period_type)} #${archive.cycle_number}</span><span class="profile-badge-period">${escapeHtml(archive.period_key)}</span></span>
+          <span class="period-symbol period-symbol-${archive.period_type}" aria-hidden="true">${archive.period_type === "daily" ? "D" : archive.period_type === "weekly" ? "W" : "M"}</span>
+        </button>`).join("") : `<span class="record-empty">Još nema osvojenih znački.</span>`;
+      document.querySelector("#profile-dialog").showModal();
+    }
+
+    async function openArchivedLeaderboard(archive) {
+      if (!archive.leaderboard) {
+        document.querySelector("#archive-title").textContent = "Učitavam arhivu...";
+        document.querySelector("#archive-winner").textContent = "";
+        document.querySelector("#archive-list").innerHTML = "";
+        document.querySelector("#archive-dialog").showModal();
+        try {
+          const response = await fetch(`/api/archives/${encodeURIComponent(archive.id)}`);
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || "Arhiva nije dostupna.");
+          archive = result;
+        } catch (error) {
+          document.querySelector("#archive-title").textContent = "Arhiva nije dostupna";
+          document.querySelector("#archive-winner").textContent = error.message || "Pokušaj ponovno.";
+          return;
+        }
+      }
+      const periodLabels = { daily: "Daily", weekly: "Weekly", monthly: "Monthly" };
+      const label = periodLabels[archive.period_type] || archive.period_type;
+      document.querySelector("#archive-title").textContent = `${label} #${archive.cycle_number} · ${archive.period_key}`;
+      document.querySelector("#archive-winner").textContent = `Pobjednik: ${archive.winner_name}`;
+      document.querySelector("#archive-list").innerHTML = archive.leaderboard.map((player, index) => {
+        const title = titleForWins(player.titleWins ?? player.wins);
+        return `<div class="archive-row">
+          <span class="archive-rank">${index + 1}</span>
+          <span class="archive-name">${title ? `<span class="title-code title-${title.className}">${title.code}</span> ` : ""}${escapeHtml(player.name)}</span>
+          <span class="archive-stat">${player.wins} W</span>
+          <span class="archive-stat">${player.losses} L</span>
+          <span class="archive-stat">${numberFormat.format(player.wins + player.losses === 0 ? 0 : player.wins / (player.wins + player.losses) * 100)}%</span>
+        </div>`;
+      }).join("");
+      document.querySelector("#archive-dialog").showModal();
+    }
+
+    function render() {
+      const allTimeRanked = rankPlayers(players);
+      const selectedData = categoryData[selectedCategory];
+      const ranked = selectedCategory === "all-time" ? allTimeRanked : selectedData ? selectedData.players : [];
       document.querySelector("#leaderboard-table").classList.toggle("editing", editing);
       boardBody.innerHTML = ranked.map(renderPlayerRow).join("");
 
@@ -652,7 +868,10 @@
         topPlayerLine.textContent = "—";
         topRate.textContent = "";
       }
-      renderLongestRound(ranked);
+      renderCategoryNavigation();
+      updateCountdowns();
+      renderMatchSelectors(allTimeRanked);
+      renderLongestRound(allTimeRanked);
       document.querySelector("#add-section").hidden = !editing;
       document.querySelector("#actions-heading").hidden = !editing;
       document.querySelector("#board-caption").textContent = editing ? "Uredi rezultate izravno u tablici" : "Poredano po broju pobjeda";
@@ -680,6 +899,29 @@
 
     document.querySelector("#titles-button").addEventListener("click", () => titlesDialog.showModal());
     document.querySelector("#close-titles").addEventListener("click", () => titlesDialog.close());
+    document.querySelector("#close-profile").addEventListener("click", () => document.querySelector("#profile-dialog").close());
+    document.querySelector("#close-archive").addEventListener("click", () => document.querySelector("#archive-dialog").close());
+
+    document.querySelector("#period-navigation").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-period]");
+      if (!button) return;
+      selectedCategory = button.dataset.period;
+      render();
+    });
+
+    boardBody.addEventListener("click", (event) => {
+      const profileButton = event.target.closest("[data-profile]");
+      if (profileButton) openPlayerProfile(profileButton.dataset.profile);
+    });
+
+    document.querySelector("#profile-badges").addEventListener("click", (event) => {
+      const badge = event.target.closest("[data-archive-id]");
+      if (!badge) return;
+      const archive = archives.find((entry) => entry.id === badge.dataset.archiveId);
+      if (!archive) return;
+      document.querySelector("#profile-dialog").close();
+      openArchivedLeaderboard(archive);
+    });
 
     document.querySelector("#cancel-password").addEventListener("click", () => passwordDialog.close());
 
@@ -701,7 +943,7 @@
         if (!stateLoaded) throw new Error("Ne mogu se povezati sa zajedničkom bazom.");
         passwordDialog.close();
         setEditing(true);
-        if (!sharedStateInitialized) await saveSharedState();
+        if (!sharedStateInitialized && await saveSharedState()) await loadSharedState();
       } catch (error) {
         passwordError.textContent = error.message || "Prijava nije uspjela. Pokušaj ponovno.";
         passwordInput.select();
@@ -722,6 +964,39 @@
       event.currentTarget.reset();
       render();
       document.querySelector("#new-name").focus();
+    });
+
+    document.querySelector("#match-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const winnerPlayerId = String(formData.get("winnerPlayerId"));
+      const loserPlayerId = String(formData.get("loserPlayerId"));
+      const errorMessage = document.querySelector("#match-error");
+      const submitButton = event.currentTarget.querySelector("button[type=submit]");
+      if (!winnerPlayerId || !loserPlayerId || winnerPlayerId === loserPlayerId) {
+        errorMessage.textContent = "Odaberi dva različita igrača.";
+        return;
+      }
+
+      submitButton.disabled = true;
+      errorMessage.textContent = "";
+      try {
+        const response = await fetch("/api/matches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${editorToken}` },
+          body: JSON.stringify({ winnerPlayerId, loserPlayerId }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Utakmica nije spremljena.");
+        event.currentTarget.reset();
+        await loadSharedState();
+        document.querySelector("#match-error").textContent = "Utakmica je spremljena u sve aktivne kategorije.";
+      } catch (error) {
+        errorMessage.textContent = error.message || "Utakmicu nije bilo moguće spremiti.";
+      } finally {
+        submitButton.disabled = false;
+        renderMatchSelectors(rankPlayers(players));
+      }
     });
 
     document.querySelector("#round-editor").addEventListener("submit", (event) => {
@@ -790,8 +1065,10 @@
     render();
     loadSharedState();
     window.setInterval(() => {
+      updateCountdowns();
       if (!editing) loadSharedState();
     }, 15000);
+    window.setInterval(updateCountdowns, 1000);
   </script>
 </body>
 </html>
