@@ -170,15 +170,15 @@
     .period-tab:hover { transform: translateY(-2px); border-color: #71845d; }
     .period-tab[aria-pressed="true"] { border-color: var(--tab-accent, var(--green)); background: linear-gradient(155deg, color-mix(in srgb, var(--tab-accent, var(--green)) 15%, #18221e), #101714 74%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tab-accent, var(--green)) 32%, transparent), 0 5px 16px rgba(0, 0, 0, .22); }
     .period-symbol { position: relative; isolation: isolate; grid-row: span 2; display: grid; width: 48px; height: 48px; place-items: center; color: #171410; font-size: 17px; font-weight: 900; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .5)); }
-    .period-symbol::after { position: absolute; inset: 5px; z-index: 0; border: 1px solid rgba(255, 246, 216, .65); clip-path: inherit; background: linear-gradient(145deg, rgba(255, 255, 255, .22), transparent 42%, rgba(32, 14, 14, .18)); content: ""; }
-    .period-glyph { position: relative; z-index: 2; text-shadow: 0 1px 1px rgba(255, 255, 255, .35); }
-    .period-symbol-daily { clip-path: polygon(50% 0, 94% 84%, 84% 98%, 16% 98%, 6% 84%); background: linear-gradient(145deg, #f1cf91 0%, #bd8d53 35%, #81542f 72%, #d6aa70 100%); padding-top: 5px; color: #372417; }
-    .period-symbol-daily::before { position: absolute; inset: 11px 12px 9px; z-index: 1; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: linear-gradient(150deg, rgba(255, 240, 197, .4), rgba(90, 50, 29, .12)); content: ""; }
-    .period-symbol-weekly { clip-path: polygon(50% 0, 61% 13%, 77% 4%, 81% 22%, 99% 25%, 91% 43%, 100% 58%, 82% 66%, 84% 87%, 64% 82%, 50% 100%, 36% 82%, 16% 87%, 18% 66%, 0 58%, 9% 43%, 1% 25%, 19% 22%, 23% 4%, 39% 13%); background: linear-gradient(145deg, #ffe7a5 0%, #f49742 34%, #c55729 68%, #ffb95a 100%); color: #482410; }
-    .period-symbol-weekly::before { position: absolute; top: 7px; left: 21px; z-index: 1; width: 5px; height: 5px; transform: rotate(45deg); background: #fff3cc; box-shadow: -13px 10px 0 #fff3cc, 13px 10px 0 #fff3cc; content: ""; }
-    .period-symbol-monthly { clip-path: polygon(0 100%, 8% 15%, 28% 27%, 31% 4%, 48% 21%, 50% 0, 66% 21%, 69% 4%, 72% 27%, 92% 15%, 100% 100%, 50% 88%); background: linear-gradient(145deg, #ffa18d 0%, #e34d59 34%, #a92743 70%, #f66b71 100%); color: #48121f; padding-top: 5px; }
-    .period-symbol-monthly::before { position: absolute; inset: 11px 12px 8px; z-index: 1; clip-path: polygon(50% 0, 100% 100%, 50% 80%, 0 100%); background: linear-gradient(150deg, rgba(255, 225, 209, .44), rgba(94, 16, 43, .14)); content: ""; }
-    .period-symbol-all-time { border: 2px solid #a6d9ff; border-radius: 50%; color: #bde4ff; font-size: 23px; box-shadow: inset 0 0 0 4px #172c3c, inset 0 0 0 6px #5a91b5, 0 0 0 2px rgba(120, 188, 255, .22); }
+    .period-symbol::after { position: absolute; inset: 5px; z-index: 0; border: 1px solid color-mix(in srgb, var(--medal-glint, #78905b) 70%, transparent); clip-path: inherit; background: linear-gradient(145deg, color-mix(in srgb, var(--medal-glint, #78905b) 35%, transparent), transparent 42%, rgba(32, 14, 14, .22)); content: ""; }
+    .period-glyph { position: relative; z-index: 2; text-shadow: 0 1px 1px rgba(45, 22, 14, .45); }
+    .period-symbol-daily { --medal-glint: #c89058; clip-path: polygon(50% 0, 94% 84%, 84% 98%, 16% 98%, 6% 84%); background: linear-gradient(145deg, #d2a16b 0%, #bd8d53 35%, #81542f 72%, #a66c3f 100%); padding-top: 5px; color: #372417; }
+    .period-symbol-daily::before { position: absolute; inset: 11px 12px 9px; z-index: 1; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: linear-gradient(150deg, rgba(176, 112, 58, .48), rgba(90, 50, 29, .18)); content: ""; }
+    .period-symbol-weekly { --medal-glint: #f08a32; clip-path: polygon(50% 0, 61% 13%, 77% 4%, 81% 22%, 99% 25%, 91% 43%, 100% 58%, 82% 66%, 84% 87%, 64% 82%, 50% 100%, 36% 82%, 16% 87%, 18% 66%, 0 58%, 9% 43%, 1% 25%, 19% 22%, 23% 4%, 39% 13%); background: linear-gradient(145deg, #e99b4d 0%, #f08a32 34%, #c55729 68%, #d9782e 100%); color: #482410; }
+    .period-symbol-weekly::before { position: absolute; top: 7px; left: 21px; z-index: 1; width: 5px; height: 5px; transform: rotate(45deg); background: #d9772d; box-shadow: -13px 10px 0 #d9772d, 13px 10px 0 #d9772d; content: ""; }
+    .period-symbol-monthly { --medal-glint: #e34757; clip-path: polygon(0 100%, 8% 15%, 28% 27%, 31% 4%, 48% 21%, 50% 0, 66% 21%, 69% 4%, 72% 27%, 92% 15%, 100% 100%, 50% 88%); background: linear-gradient(145deg, #df5960 0%, #e34d59 34%, #a92743 70%, #c5384d 100%); color: #48121f; padding-top: 5px; }
+    .period-symbol-monthly::before { position: absolute; inset: 11px 12px 8px; z-index: 1; clip-path: polygon(50% 0, 100% 100%, 50% 80%, 0 100%); background: linear-gradient(150deg, rgba(207, 54, 72, .5), rgba(94, 16, 43, .2)); content: ""; }
+    .period-symbol-all-time { --medal-glint: #78bcff; border: 2px solid #78bcff; border-radius: 50%; color: #9bd0f5; font-size: 23px; box-shadow: inset 0 0 0 4px #172c3c, inset 0 0 0 6px #4c83a8, 0 0 0 2px rgba(120, 188, 255, .22); }
     .period-tab-title { min-width: 0; font-size: 14px; font-weight: 850; }
     .period-cycle { display: inline-block; margin-left: 6px; padding: 2px 5px; border: 1px solid color-mix(in srgb, var(--tab-accent, var(--green)) 48%, transparent); border-radius: 2px; color: var(--tab-accent, var(--green)); font-size: 9px; font-weight: 800; }
     .period-countdown { grid-column: 2; width: fit-content; padding: 3px 6px; border: 1px solid color-mix(in srgb, var(--tab-accent, var(--green)) 28%, transparent); border-radius: 2px; background: rgba(0, 0, 0, .2); color: #c9d2c8; font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -338,7 +338,7 @@
       .period-symbol { width: 36px; height: 36px; font-size: 13px; }
       .period-symbol-all-time { font-size: 19px; }
       .period-symbol-daily::before, .period-symbol-monthly::before { inset: 9px 9px 7px; }
-      .period-symbol-weekly::before { top: 5px; left: 15px; width: 4px; height: 4px; box-shadow: -10px 8px 0 #fff3cc, 10px 8px 0 #fff3cc; }
+      .period-symbol-weekly::before { top: 5px; left: 15px; width: 4px; height: 4px; box-shadow: -10px 8px 0 #d9772d, 10px 8px 0 #d9772d; }
       .period-tab-title { font-size: 12px; }
       .period-cycle { display: inline-block; margin: 2px 0 0 4px; }
       .period-countdown { font-size: 9px; }
