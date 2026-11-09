@@ -118,7 +118,7 @@ function rankPlayers(players) {
   });
 }
 
-async function getPeriodLeaderboard(client, type, periodKey, players) {
+async function getPeriodLeaderboard(client, type, periodKey, players, includeCorrections = true) {
   const column = periodColumns[type];
   const result = await client.query(
     `SELECT player_id, player_name, result_type, all_time_wins
@@ -135,6 +135,22 @@ async function getPeriodLeaderboard(client, type, periodKey, players) {
     if (outcome.result_type === "win") player.wins += 1;
     else player.losses += 1;
     player.titleWins = Math.max(player.titleWins || 0, outcome.all_time_wins);
+  }
+
+  if (includeCorrections) {
+    const correctionResult = await client.query(
+      `SELECT player_id, player_name, wins_delta, losses_delta
+       FROM leaderboard_period_corrections WHERE period_type = $1 AND period_key = $2`,
+      [type, periodKey],
+    );
+    for (const correction of correctionResult.rows) {
+      if (!scores.has(correction.player_id)) {
+        scores.set(correction.player_id, { id: correction.player_id, name: correction.player_name, titleWins: 0, wins: 0, losses: 0 });
+      }
+      const player = scores.get(correction.player_id);
+      player.wins = Math.max(0, player.wins + correction.wins_delta);
+      player.losses = Math.max(0, player.losses + correction.losses_delta);
+    }
   }
 
   return rankPlayers([...scores.values()]);
@@ -179,6 +195,11 @@ async function advancePeriods(client, players, now = new Date()) {
           [crypto.randomUUID(), type, completedKey, period.cycle_number, range.startsAt, range.endsAt, winner.id, winner.name, JSON.stringify(leaderboard)],
         );
       }
+
+      await client.query(
+        "DELETE FROM leaderboard_period_corrections WHERE period_type = $1 AND period_key = $2",
+        [type, completedKey],
+      );
 
       period.period_key = nextPeriodKey(type, completedKey);
       period.cycle_number += 1;
@@ -419,6 +440,85 @@ app.post("/api/matches", async (request, response, next) => {
   }
 });
 
+app.put("/api/period-corrections/:type/:playerId", async (request, response, next) => {
+  if (!hasValidToken(request)) return response.status(401).json({ error: "Prijava je istekla. Prijavi se ponovno." });
+  const { type, playerId } = request.params;
+  if (!periodTypes.includes(type) || !/^[\w-]{1,80}$/.test(playerId)) {
+    return response.status(400).json({ error: "Neispravna kategorija ili igrač." });
+  }
+  const periodKey = typeof request.body.periodKey === "string" ? request.body.periodKey : "";
+  const cycleNumber = Number(request.body.cycleNumber);
+  const wins = request.body.wins;
+  const losses = request.body.losses;
+  if (!Number.isSafeInteger(wins) || wins < 0 || wins > 500000 || !Number.isSafeInteger(losses) || losses < 0 || losses > 500000) {
+    return response.status(400).json({ error: "Upiši ispravne vrijednosti za W i L." });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const stateResult = await client.query("SELECT data, initialized FROM leaderboard_state WHERE id = 1 FOR UPDATE");
+    const stateRow = stateResult.rows[0];
+    if (!stateRow || !stateRow.initialized) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: "Zajednički leaderboard nije inicijaliziran." });
+    }
+
+    const state = validateState(stateRow.data);
+    const player = state && state.players.find((entry) => entry.id === playerId);
+    if (!player) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Igrač nije pronađen." });
+    }
+
+    const now = new Date();
+    await advancePeriods(client, state.players, now);
+    const activePeriodResult = await client.query(
+      "SELECT period_key, cycle_number FROM leaderboard_periods WHERE period_type = $1 FOR UPDATE",
+      [type],
+    );
+    const activePeriod = activePeriodResult.rows[0];
+    if (!activePeriod || activePeriod.period_key !== periodKey || activePeriod.cycle_number !== cycleNumber) {
+      await client.query("ROLLBACK");
+      return response.status(409).json({ error: "Ovaj ciklus je završio. Osvježi ljestvicu i pokušaj ponovno." });
+    }
+
+    const baseLeaderboard = await getPeriodLeaderboard(client, type, periodKey, state.players, false);
+    const basePlayer = baseLeaderboard.find((entry) => entry.id === playerId);
+    const winsDelta = wins - (basePlayer ? basePlayer.wins : 0);
+    const lossesDelta = losses - (basePlayer ? basePlayer.losses : 0);
+    if (Math.abs(winsDelta) > 500 || Math.abs(lossesDelta) > 500) {
+      await client.query("ROLLBACK");
+      return response.status(400).json({ error: "Ispravka može promijeniti najviše 500 rezultata." });
+    }
+
+    if (winsDelta === 0 && lossesDelta === 0) {
+      await client.query(
+        "DELETE FROM leaderboard_period_corrections WHERE period_type = $1 AND period_key = $2 AND player_id = $3",
+        [type, periodKey, playerId],
+      );
+    } else {
+      await client.query(
+        `INSERT INTO leaderboard_period_corrections
+           (period_type, period_key, cycle_number, player_id, player_name, wins_delta, losses_delta, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+         ON CONFLICT (period_type, period_key, player_id)
+         DO UPDATE SET cycle_number = EXCLUDED.cycle_number, player_name = EXCLUDED.player_name,
+                       wins_delta = EXCLUDED.wins_delta, losses_delta = EXCLUDED.losses_delta, updated_at = NOW()`,
+        [type, periodKey, cycleNumber, playerId, player.name, winsDelta, lossesDelta],
+      );
+    }
+
+    await client.query("COMMIT");
+    response.json({ ok: true });
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
 app.get("/", (request, response) => response.sendFile(path.join(__dirname, "index.html")));
 
 app.use((error, request, response, next) => {
@@ -509,6 +609,19 @@ async function start() {
       winner_name text NOT NULL,
       leaderboard jsonb NOT NULL,
       UNIQUE (period_type, period_key)
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS leaderboard_period_corrections (
+      period_type text NOT NULL CHECK (period_type IN ('daily', 'weekly', 'monthly')),
+      period_key text NOT NULL,
+      cycle_number integer NOT NULL CHECK (cycle_number > 0),
+      player_id text NOT NULL,
+      player_name text NOT NULL,
+      wins_delta integer NOT NULL,
+      losses_delta integer NOT NULL,
+      updated_at timestamptz NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (period_type, period_key, player_id)
     )
   `);
   await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_archives_winner_idx ON leaderboard_archives (winner_player_id)");

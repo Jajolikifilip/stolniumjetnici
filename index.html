@@ -160,18 +160,23 @@
     .round-editor .primary-button { min-width: 125px; }
 
     .period-navigation { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 26px; }
-    .period-tab { display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 4px 11px; min-height: 76px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--ink); text-align: left; }
-    .period-tab:hover { border-color: #667653; }
-    .period-tab[aria-pressed="true"] { border-color: var(--green); background: #18221b; box-shadow: inset 0 -2px var(--green); }
-    .period-symbol { grid-row: span 2; display: grid; width: 36px; height: 36px; place-items: center; color: #141512; font-size: 15px; font-weight: 900; }
-    .period-symbol-daily { clip-path: polygon(50% 0, 100% 100%, 0 100%); background: #a77a4b; padding-top: 9px; }
-    .period-symbol-weekly { clip-path: polygon(50% 0, 62% 16%, 89% 7%, 82% 32%, 100% 49%, 81% 63%, 90% 92%, 61% 83%, 50% 100%, 39% 83%, 10% 92%, 19% 63%, 0 49%, 18% 32%, 11% 7%, 38% 16%); background: #f08a32; }
-    .period-symbol-monthly { clip-path: polygon(0 100%, 8% 7%, 34% 27%, 50% 0, 66% 27%, 92% 7%, 100% 100%); background: #c83e49; padding-top: 7px; }
-    .period-symbol-all-time { border: 2px solid #78bcff; border-radius: 50%; color: #78bcff; font-size: 22px; }
+    .period-tab { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 4px 11px; min-height: 80px; padding: 10px 12px; border: 1px solid #33413a; border-radius: 3px; background: linear-gradient(160deg, #18221e, #101714 72%); color: var(--ink); text-align: left; transition: border-color .2s ease, transform .2s ease, background .2s ease; }
+    .period-tab:hover { transform: translateY(-2px); border-color: #71845d; }
+    .period-tab[aria-pressed="true"] { border-color: var(--green); background: linear-gradient(160deg, #202c20, #101714 72%); box-shadow: inset 0 -2px var(--green); }
+    .period-symbol { position: relative; isolation: isolate; grid-row: span 2; display: grid; width: 40px; height: 40px; place-items: center; color: #171410; font-size: 15px; font-weight: 900; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .45)); }
+    .period-symbol::after { position: absolute; inset: 4px; z-index: 0; border: 1px solid rgba(255, 246, 216, .52); clip-path: inherit; background: linear-gradient(145deg, rgba(255, 255, 255, .18), transparent 42%, rgba(32, 14, 14, .2)); content: ""; }
+    .period-glyph { position: relative; z-index: 1; text-shadow: 0 1px 1px rgba(255, 255, 255, .25); }
+    .period-symbol-daily { clip-path: polygon(50% 0, 100% 100%, 0 100%); background: linear-gradient(145deg, #e0b777 0%, #a87948 48%, #65432d 100%); padding-top: 8px; }
+    .period-symbol-weekly { clip-path: polygon(50% 0, 62% 16%, 89% 7%, 82% 32%, 100% 49%, 81% 63%, 90% 92%, 61% 83%, 50% 100%, 39% 83%, 10% 92%, 19% 63%, 0 49%, 18% 32%, 11% 7%, 38% 16%); background: linear-gradient(145deg, #ffe09b 0%, #f28a36 42%, #a84625 100%); color: #3b2114; }
+    .period-symbol-weekly::before { position: absolute; top: 5px; left: 18px; z-index: 1; width: 4px; height: 4px; transform: rotate(45deg); background: #fff0c1; box-shadow: -10px 7px 0 #fff0c1, 10px 7px 0 #fff0c1; content: ""; }
+    .period-symbol-monthly { clip-path: polygon(0 100%, 8% 7%, 34% 27%, 50% 0, 66% 27%, 92% 7%, 100% 100%); background: linear-gradient(145deg, #ff9580 0%, #d33f4b 45%, #711f34 100%); color: #3a111b; padding-top: 7px; }
+    .period-symbol-all-time { border: 2px solid #9ed5ff; border-radius: 50%; color: #9ed5ff; font-size: 22px; box-shadow: inset 0 0 0 3px #162b3c, 0 0 0 2px rgba(120, 188, 255, .2); }
     .period-tab-title { min-width: 0; font-size: 13px; font-weight: 800; }
     .period-cycle { margin-left: 5px; color: var(--muted); font-size: 10px; font-weight: 650; }
     .period-countdown { grid-column: 2; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .category-description { margin: -14px 0 18px; color: var(--muted); font-size: 12px; }
+    .period-correction-note { margin: 0 0 12px; padding: 9px 11px; border-left: 2px solid var(--title-yellow); background: rgba(255, 209, 102, .07); color: #e7d4a0; font-size: 12px; line-height: 1.45; }
+    .period-correction-note[hidden] { display: none; }
 
     .match-entry { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
     .match-entry[hidden] { display: none; }
@@ -321,8 +326,8 @@
       .round-editor { grid-template-columns: 1fr 1fr; }
       .round-editor .field:first-child, .round-editor .primary-button { grid-column: 1 / -1; }
       .period-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-bottom: 20px; }
-      .period-tab { grid-template-columns: 30px minmax(0, 1fr); gap: 3px 8px; min-height: 66px; padding: 8px; }
-      .period-symbol { width: 29px; height: 29px; font-size: 13px; }
+      .period-tab { grid-template-columns: 34px minmax(0, 1fr); gap: 3px 8px; min-height: 68px; padding: 8px; }
+      .period-symbol { width: 32px; height: 32px; font-size: 12px; }
       .period-symbol-all-time { font-size: 19px; }
       .period-tab-title { font-size: 12px; }
       .period-cycle { display: block; margin: 2px 0 0; }
@@ -363,6 +368,8 @@
       table.editing .edit-input { width: 100%; min-width: 0; padding: 0 2px; }
       table.editing .name-input { width: 100%; }
       table.editing .delete-button { padding: 6px 0; font-size: 10px; }
+      table.editing-period .edit-input { width: 100%; min-width: 0; padding: 0 2px; }
+      table.editing-period .record, table.editing-period .rate { font-size: 13px; }
       .add-form { grid-template-columns: 1fr 1fr; }
       .field:first-child { grid-column: 1 / -1; }
       .primary-button { grid-column: 1 / -1; }
@@ -400,10 +407,10 @@
     </section>
 
     <nav class="period-navigation" id="period-navigation" aria-label="Kategorije leaderboarda">
-      <button class="period-tab" type="button" data-period="daily" aria-pressed="false"><span class="period-symbol period-symbol-daily">D</span><span class="period-tab-title">Daily<span class="period-cycle" data-cycle="daily">#1</span></span><span class="period-countdown" data-countdown="daily">--:--:--</span></button>
-      <button class="period-tab" type="button" data-period="weekly" aria-pressed="false"><span class="period-symbol period-symbol-weekly">W</span><span class="period-tab-title">Weekly<span class="period-cycle" data-cycle="weekly">#1</span></span><span class="period-countdown" data-countdown="weekly">--d --:--:--</span></button>
-      <button class="period-tab" type="button" data-period="monthly" aria-pressed="false"><span class="period-symbol period-symbol-monthly">M</span><span class="period-tab-title">Monthly<span class="period-cycle" data-cycle="monthly">#1</span></span><span class="period-countdown" data-countdown="monthly">--d --:--:--</span></button>
-      <button class="period-tab" type="button" data-period="all-time" aria-pressed="true"><span class="period-symbol period-symbol-all-time">∞</span><span class="period-tab-title">All Time<span class="period-cycle">Zauvijek</span></span></button>
+      <button class="period-tab" type="button" data-period="daily" aria-pressed="false"><span class="period-symbol period-symbol-daily"><span class="period-glyph">D</span></span><span class="period-tab-title">Daily<span class="period-cycle" data-cycle="daily">#1</span></span><span class="period-countdown" data-countdown="daily">--:--:--</span></button>
+      <button class="period-tab" type="button" data-period="weekly" aria-pressed="false"><span class="period-symbol period-symbol-weekly"><span class="period-glyph">W</span></span><span class="period-tab-title">Weekly<span class="period-cycle" data-cycle="weekly">#1</span></span><span class="period-countdown" data-countdown="weekly">--d --:--:--</span></button>
+      <button class="period-tab" type="button" data-period="monthly" aria-pressed="false"><span class="period-symbol period-symbol-monthly"><span class="period-glyph">M</span></span><span class="period-tab-title">Monthly<span class="period-cycle" data-cycle="monthly">#1</span></span><span class="period-countdown" data-countdown="monthly">--d --:--:--</span></button>
+      <button class="period-tab" type="button" data-period="all-time" aria-pressed="true"><span class="period-symbol period-symbol-all-time"><span class="period-glyph">∞</span></span><span class="period-tab-title">All Time<span class="period-cycle">Zauvijek</span></span></button>
     </nav>
     <p class="category-description" id="category-description">Ukupni rezultati za sva vremena.</p>
 
@@ -431,6 +438,7 @@
         <h2 id="leaderboard-title">Leaderboard</h2>
         <span class="section-caption" id="board-caption">Poredano po broju pobjeda</span>
       </div>
+      <p class="period-correction-note" id="period-correction-note" hidden>Ispravljaš samo ovaj aktivni ciklus. Nove utakmice nastavljaju se automatski pribrajati.</p>
       <div class="table-wrap">
         <table id="leaderboard-table">
           <thead><tr><th scope="col">#</th><th scope="col">Igrač</th><th scope="col">W</th><th scope="col">L</th><th scope="col">Postotak</th><th scope="col" id="actions-heading" hidden>Akcije</th></tr></thead>
@@ -677,17 +685,17 @@
           <td class="rank${title ? ` title-${title.className}` : ""}" data-label="#">${index + 1}</td>
           <td data-label="Igrač"><div class="player-cell">${title
             ? `<span class="title-code title-${title.className}" title="${title.name}" aria-label="Titula: ${title.name}">${title.code}</span>`
-            : ""}${editing
+            : ""}${editingAllTime
             ? `<input class="edit-input name-input" aria-label="Ime igrača" data-id="${escapeHtml(player.id)}" data-field="name" maxlength="50" value="${escapeHtml(player.name)}">`
             : `<button class="player-name" type="button" data-profile="${escapeHtml(player.id)}">${escapeHtml(player.name)}</button>`}</div></td>
-          <td class="record" data-label="W">${editingAllTime
+          <td class="record" data-label="W">${editing
             ? `<input class="edit-input" aria-label="Pobjede igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="wins" type="number" min="0" step="1" value="${player.wins}">`
             : player.wins}</td>
-          <td class="record" data-label="L">${editingAllTime
+          <td class="record" data-label="L">${editing
             ? `<input class="edit-input" aria-label="Porazi igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="losses" type="number" min="0" step="1" value="${player.losses}">`
             : player.losses}</td>
           <td class="rate" data-label="Postotak"><span class="rate-pill">${formatRate(player)}</span></td>
-          ${editing ? `<td class="row-actions" data-label="Akcije"><button class="delete-button" type="button" data-delete="${escapeHtml(player.id)}" aria-label="Obriši igrača ${escapeHtml(player.name)}">Obriši</button></td>` : ""}
+          ${editingAllTime ? `<td class="row-actions" data-label="Akcije"><button class="delete-button" type="button" data-delete="${escapeHtml(player.id)}" aria-label="Obriši igrača ${escapeHtml(player.name)}">Obriši</button></td>` : ""}
         </tr>`;
     }
 
@@ -787,6 +795,30 @@
       document.querySelector("#match-form button[type=submit]").disabled = rankedPlayers.length < 2;
     }
 
+    async function savePeriodCorrection(player) {
+      const period = categoryData[selectedCategory];
+      if (!editorToken || !period) {
+        setSyncStatus("Ispravke perioda može spremiti samo administrator.", "error");
+        return;
+      }
+
+      setSyncStatus("Spremam ispravak perioda...");
+      try {
+        const response = await fetch(`/api/period-corrections/${selectedCategory}/${encodeURIComponent(player.id)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${editorToken}` },
+          body: JSON.stringify({ periodKey: period.periodKey, cycleNumber: period.cycleNumber, wins: player.wins, losses: player.losses }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Ispravak nije spremljen.");
+        await loadSharedState();
+        setSyncStatus("Ispravak je spremljen; nove utakmice i dalje se automatski dodaju.", "ok");
+      } catch (error) {
+        setSyncStatus(error.message || "Ispravak nije spremljen.", "error");
+        await loadSharedState();
+      }
+    }
+
     function openPlayerProfile(playerId) {
       const player = players.find((entry) => entry.id === playerId);
       if (!player) return;
@@ -808,7 +840,7 @@
       badgesContainer.innerHTML = playerBadges.length ? playerBadges.map((archive) => `
         <button class="profile-badge" type="button" data-archive-id="${escapeHtml(archive.id)}">
           <span><span class="profile-badge-name">${escapeHtml(periodLabels[archive.period_type] || archive.period_type)} #${archive.cycle_number}</span><span class="profile-badge-period">${escapeHtml(archive.period_key)}</span></span>
-          <span class="period-symbol period-symbol-${archive.period_type}" aria-hidden="true">${archive.period_type === "daily" ? "D" : archive.period_type === "weekly" ? "W" : "M"}</span>
+          <span class="period-symbol period-symbol-${archive.period_type}" aria-hidden="true"><span class="period-glyph">${archive.period_type === "daily" ? "D" : archive.period_type === "weekly" ? "W" : "M"}</span></span>
         </button>`).join("") : `<span class="record-empty">Još nema osvojenih znački.</span>`;
       document.querySelector("#profile-dialog").showModal();
     }
@@ -851,7 +883,9 @@
       const allTimeRanked = rankPlayers(players);
       const selectedData = categoryData[selectedCategory];
       const ranked = selectedCategory === "all-time" ? allTimeRanked : selectedData ? selectedData.players : [];
-      document.querySelector("#leaderboard-table").classList.toggle("editing", editing);
+      const editingAllTime = editing && selectedCategory === "all-time";
+      document.querySelector("#leaderboard-table").classList.toggle("editing", editingAllTime);
+      document.querySelector("#leaderboard-table").classList.toggle("editing-period", editing && !editingAllTime);
       boardBody.innerHTML = ranked.map(renderPlayerRow).join("");
 
       emptyState.hidden = players.length > 0;
@@ -877,9 +911,12 @@
       updateCountdowns();
       renderMatchSelectors(allTimeRanked);
       renderLongestRound(allTimeRanked);
-      document.querySelector("#add-section").hidden = !editing;
-      document.querySelector("#actions-heading").hidden = !editing;
-      document.querySelector("#board-caption").textContent = editing ? "Uredi rezultate izravno u tablici" : "Poredano po broju pobjeda";
+      document.querySelector("#add-section").hidden = !editingAllTime;
+      document.querySelector("#actions-heading").hidden = !editingAllTime;
+      document.querySelector("#period-correction-note").hidden = !editing || editingAllTime;
+      document.querySelector("#board-caption").textContent = editing
+        ? editingAllTime ? "Uredi All Time; aktivne ljestvice prate promjene" : "Ispravi W/L u ovoj periodnoj ljestvici"
+        : "Poredano po broju pobjeda";
     }
 
     function setEditing(value) {
@@ -1042,16 +1079,32 @@
     boardBody.addEventListener("change", (event) => {
       const input = event.target.closest("[data-field]");
       if (!input) return;
-      const player = players.find((entry) => entry.id === input.dataset.id);
-      if (!player) return;
       if (input.dataset.field === "name") {
+        if (selectedCategory !== "all-time") return;
+        const player = players.find((entry) => entry.id === input.dataset.id);
+        if (!player) return;
         const name = input.value.trim();
         if (name) player.name = name.slice(0, 50);
-      } else {
-        player[input.dataset.field] = Math.max(0, Math.floor(Number(input.value) || 0));
+        savePlayers();
+        render();
+        return;
       }
-      savePlayers();
-      render();
+
+      const value = Math.max(0, Math.floor(Number(input.value) || 0));
+      if (selectedCategory === "all-time") {
+        const player = players.find((entry) => entry.id === input.dataset.id);
+        if (!player) return;
+        player[input.dataset.field] = value;
+        savePlayers();
+        render();
+      } else {
+        const category = categoryData[selectedCategory];
+        const player = category && category.players.find((entry) => entry.id === input.dataset.id);
+        if (!player) return;
+        player[input.dataset.field] = value;
+        render();
+        savePeriodCorrection(player);
+      }
     });
 
     boardBody.addEventListener("click", (event) => {

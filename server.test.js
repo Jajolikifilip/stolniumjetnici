@@ -11,6 +11,7 @@ const periodRows = new Map();
 const matches = [];
 const results = [];
 const archives = [];
+const corrections = new Map();
 
 class TestPool {
   async query(sql, values = []) {
@@ -50,6 +51,23 @@ class TestPool {
     if (query.includes("FROM leaderboard_results WHERE") && /WHERE (daily_key|weekly_key|monthly_key) = \$1/.test(query)) {
       const column = query.match(/WHERE (daily_key|weekly_key|monthly_key) = \$1/)[1];
       return { rows: results.filter((result) => result[column] === values[0] && !result.voided).map((result) => ({ ...result })) };
+    }
+    if (query.includes("FROM leaderboard_period_corrections WHERE period_type = $1 AND period_key = $2")) {
+      return { rows: [...corrections.values()].filter((entry) => entry.period_type === values[0] && entry.period_key === values[1]).map((entry) => ({ ...entry })) };
+    }
+    if (query.includes("DELETE FROM leaderboard_period_corrections")) {
+      for (const [key, correction] of corrections) {
+        if (correction.period_type === values[0] && correction.period_key === values[1] && (!values[2] || correction.player_id === values[2])) corrections.delete(key);
+      }
+      return { rows: [] };
+    }
+    if (query.includes("INSERT INTO leaderboard_period_corrections")) {
+      const correction = {
+        period_type: values[0], period_key: values[1], cycle_number: values[2], player_id: values[3],
+        player_name: values[4], wins_delta: values[5], losses_delta: values[6],
+      };
+      corrections.set(`${values[0]}:${values[1]}:${values[3]}`, correction);
+      return { rows: [] };
     }
     if (query.includes("WITH latest_result AS")) {
       const index = results.findLastIndex((result) => result.player_id === values[0] && !result.voided && result.result_type === (query.includes("'win'") ? "win" : "loss"));
@@ -235,7 +253,39 @@ test("shared period rankings require admin-authenticated match results", async (
   const correctedResult = await response.json();
   assert.equal(correctedResult.categories.daily.players.find((player) => player.id === "ante").wins, 1);
 
-  state.players[0].wins = 10;
+  response = await fetch(`${url}/api/period-corrections/daily/ante`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ periodKey: correctedResult.categories.daily.periodKey, cycleNumber: correctedResult.categories.daily.cycleNumber, wins: 5, losses: 2 }),
+  });
+  assert.equal(response.status, 401);
+
+  response = await fetch(`${url}/api/period-corrections/daily/ante`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ periodKey: correctedResult.categories.daily.periodKey, cycleNumber: correctedResult.categories.daily.cycleNumber, wins: 5, losses: 2 }),
+  });
+  assert.equal(response.status, 200);
+  response = await fetch(`${url}/api/state`);
+  const manuallyCorrected = await response.json();
+  assert.equal(manuallyCorrected.categories.daily.players.find((player) => player.id === "ante").wins, 5);
+  assert.equal(manuallyCorrected.categories.daily.players.find((player) => player.id === "ante").losses, 2);
+
+  const allTimeAfterCorrection = {
+    ...manuallyCorrected.state,
+    players: manuallyCorrected.state.players.map((player) => player.id === "ante" ? { ...player, wins: 11 } : player),
+  };
+  response = await fetch(`${url}/api/state`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(allTimeAfterCorrection),
+  });
+  assert.equal(response.status, 200);
+  response = await fetch(`${url}/api/state`);
+  const correctedAndAutoUpdated = await response.json();
+  assert.equal(correctedAndAutoUpdated.categories.daily.players.find((player) => player.id === "ante").wins, 6);
+
+  state.players[0].wins = 11;
   state.players[1].losses = 3;
 
   periodRows.set("daily", { period_type: "daily", period_key: "2026-10-29", cycle_number: 2 });
