@@ -208,24 +208,25 @@
 
     .profile-summary { margin: 0 0 18px; color: var(--muted); line-height: 1.5; }
     .profile-section-title { margin: 20px 0 10px; padding-top: 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-    .profile-periods, .profile-badges { display: grid; gap: 8px; }
-    .profile-period-row, .profile-badge { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 2px; background: var(--paper); }
+    .profile-periods { display: grid; gap: 8px; }
+    .profile-badges { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 14px 18px; align-items: start; }
+    .profile-period-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 2px; background: var(--paper); }
     .profile-period-name, .profile-badge-label { font-size: 12px; font-weight: 750; }
     .profile-period-score { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-    .profile-badge { width: 100%; color: var(--ink); cursor: pointer; text-align: left; }
-    .profile-badge .period-symbol { grid-row: auto; width: 34px; height: 44px; flex: 0 0 34px; }
-    .profile-badge .period-medal { left: 2px; width: 30px; height: 30px; }
-    .profile-badge .period-glyph { font-size: 13px; }
-    .profile-badge .period-ornament-crown { top: 4px; left: 6px; width: 22px; height: 9px; }
-    .profile-badge .period-ornament-rings { top: 1px; left: 1px; width: 32px; height: 15px; }
-    .profile-badge .period-ornament-rings::before, .profile-badge .period-ornament-rings::after { top: 6px; width: 9px; height: 1px; }
+    .profile-badge { display: grid; grid-template-columns: minmax(0, 1fr) 42px; align-items: center; gap: 9px; width: 100%; min-height: 72px; padding: 7px 4px; border: 0; border-radius: 0; background: transparent; color: var(--ink); cursor: pointer; text-align: left; }
+    .profile-badge .period-symbol { grid-row: auto; width: 42px; height: 60px; }
+    .profile-badge .period-medal { left: 1px; width: 40px; height: 40px; }
+    .profile-badge .period-glyph { font-size: 18px; }
+    .profile-badge .period-ornament-crown { top: 8px; left: 5px; width: 32px; height: 12px; }
+    .profile-badge .period-ornament-rings { top: 0; left: 3px; width: 36px; height: 18px; }
+    .profile-badge .period-ornament-rings::before, .profile-badge .period-ornament-rings::after { top: 9px; width: 12px; height: 2px; }
     .profile-badge .period-ornament-rings::before { left: 4px; }
     .profile-badge .period-ornament-rings::after { right: 4px; }
-    .profile-badge .period-ornament-rings i { width: 7px; height: 7px; border-width: 2px; }
+    .profile-badge .period-ornament-rings i { width: 10px; height: 10px; border-width: 2px; }
     .profile-badge .period-ornament-rings i:nth-child(2) { right: 0; }
-    .profile-badge .period-ornament-rings i:nth-child(3) { top: 7px; left: 12px; }
-    .profile-badge .period-ornament-halo { top: 5px; left: 2px; width: 28px; height: 8px; border-width: 2px; }
-    .profile-badge:hover { border-color: var(--green); }
+    .profile-badge .period-ornament-rings i:nth-child(3) { top: 8px; left: 12px; }
+    .profile-badge .period-ornament-halo { top: 11px; left: 4px; width: 34px; height: 9px; border-width: 2px; }
+    .profile-badge:hover { background: rgba(185, 229, 91, .055); }
     .profile-badge-name { display: block; color: var(--green); font-size: 12px; font-weight: 800; }
     .profile-badge-period { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
     .archive-winner { margin: 0 0 14px; color: var(--green); font-weight: 750; }
@@ -387,7 +388,17 @@
       .archive-stat { font-size: 10px; }
       .archive-row.is-editing .archive-remove { grid-column: 2 / -1; justify-self: end; }
       .archive-actions { justify-content: flex-start; }
-      .profile-period-row, .profile-badge { gap: 7px; padding: 8px; }
+      .profile-period-row { gap: 7px; padding: 8px; }
+      .profile-badges { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 12px 14px; }
+      .profile-badge { min-height: 68px; gap: 6px; padding: 5px 2px; }
+      .profile-badge .period-symbol { width: 38px; height: 56px; }
+      .profile-badge .period-medal { width: 36px; height: 36px; }
+      .profile-badge .period-glyph { font-size: 16px; }
+      .profile-badge .period-ornament-crown { top: 8px; left: 4px; width: 29px; height: 11px; }
+      .profile-badge .period-ornament-rings { left: 2px; width: 33px; height: 17px; }
+      .profile-badge .period-ornament-rings i { width: 9px; height: 9px; }
+      .profile-badge .period-ornament-rings i:nth-child(3) { left: 11px; }
+      .profile-badge .period-ornament-halo { top: 11px; left: 3px; width: 31px; height: 8px; }
       .profile-period-name, .profile-period-score, .profile-badge-name { font-size: 11px; }
       .table-wrap { margin-right: 0; padding-right: 0; overflow-x: hidden; }
       table { display: table; width: 100%; min-width: 0; table-layout: fixed; }
