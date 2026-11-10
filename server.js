@@ -522,12 +522,6 @@ app.put("/api/period-corrections/:type/:playerId", async (request, response, nex
     }
 
     const state = validateState(stateRow.data);
-    const player = state && state.players.find((entry) => entry.id === playerId);
-    if (!player) {
-      await client.query("ROLLBACK");
-      return response.status(404).json({ error: "Igrač nije pronađen." });
-    }
-
     const now = new Date();
     await advancePeriods(client, state.players, now);
     const activePeriodResult = await client.query(
@@ -542,8 +536,18 @@ app.put("/api/period-corrections/:type/:playerId", async (request, response, nex
 
     const baseLeaderboard = await getPeriodLeaderboard(client, type, periodKey, state.players, false);
     const basePlayer = baseLeaderboard.find((entry) => entry.id === playerId);
+    const player = state.players.find((entry) => entry.id === playerId)
+      || (isHidden && basePlayer ? basePlayer : null);
+    if (!player) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Igrač nije pronađen na ovoj ljestvici." });
+    }
     const winsDelta = wins - (basePlayer ? basePlayer.wins : 0);
     const lossesDelta = losses - (basePlayer ? basePlayer.losses : 0);
+    if (!isHidden && !state.players.some((entry) => entry.id === playerId)) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Za ispravljanje W/L igrač mora postojati u All Timeu." });
+    }
     if (Math.abs(winsDelta) > 500 || Math.abs(lossesDelta) > 500) {
       await client.query("ROLLBACK");
       return response.status(400).json({ error: "Ispravka može promijeniti najviše 500 rezultata." });

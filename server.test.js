@@ -310,6 +310,25 @@ test("shared period rankings require admin-authenticated match results", async (
   assert.equal(hiddenPeriodPlayer.categories.daily.players.some((player) => player.id === "damir"), false);
   assert.equal(hiddenPeriodPlayer.categories["all-time"].players.some((player) => player.id === "damir"), true);
 
+  results.push({
+    id: "orphan-bobby-result", player_id: "bobby", player_name: "Bobby", result_type: "win", all_time_wins: 1,
+    daily_key: activeDaily.periodKey, weekly_key: activeDaily.periodKey.slice(0, 10), monthly_key: activeDaily.periodKey.slice(0, 7), voided: false,
+  });
+  response = await fetch(`${url}/api/state`);
+  const orphanBobbyState = await response.json();
+  assert.equal(orphanBobbyState.state.players.some((player) => player.id === "bobby"), false);
+  assert.equal(orphanBobbyState.categories.daily.players.some((player) => player.id === "bobby"), true);
+  response = await fetch(`${url}/api/period-corrections/daily/bobby`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ periodKey: orphanBobbyState.categories.daily.periodKey, cycleNumber: orphanBobbyState.categories.daily.cycleNumber, wins: 1, losses: 0, isHidden: true }),
+  });
+  assert.equal(response.status, 200);
+  response = await fetch(`${url}/api/state`);
+  const removedOrphanBobby = await response.json();
+  assert.equal(removedOrphanBobby.categories.daily.players.some((player) => player.id === "bobby"), false);
+  assert.equal(removedOrphanBobby.state.players.some((player) => player.id === "bobby"), false);
+
   state.players[0].wins = 11;
   state.players[1].losses = 3;
 
