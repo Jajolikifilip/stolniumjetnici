@@ -169,16 +169,24 @@
     .period-tab[data-period="all-time"] { --tab-accent: #78bcff; }
     .period-tab:hover { transform: translateY(-2px); border-color: #71845d; }
     .period-tab[aria-pressed="true"] { border-color: var(--tab-accent, var(--green)); background: linear-gradient(155deg, color-mix(in srgb, var(--tab-accent, var(--green)) 15%, #18221e), #101714 74%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tab-accent, var(--green)) 32%, transparent), 0 5px 16px rgba(0, 0, 0, .22); }
-    .period-symbol { position: relative; isolation: isolate; grid-row: span 2; display: grid; width: 48px; height: 48px; place-items: center; color: #171410; font-size: 17px; font-weight: 900; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .5)); }
-    .period-symbol::after { position: absolute; inset: 5px; z-index: 0; border: 1px solid color-mix(in srgb, var(--medal-glint, #78905b) 70%, transparent); clip-path: inherit; background: linear-gradient(145deg, color-mix(in srgb, var(--medal-glint, #78905b) 35%, transparent), transparent 42%, rgba(32, 14, 14, .22)); content: ""; }
-    .period-glyph { position: relative; z-index: 2; text-shadow: 0 1px 1px rgba(45, 22, 14, .45); }
-    .period-symbol-daily { --medal-glint: #c89058; clip-path: polygon(50% 0, 94% 84%, 84% 98%, 16% 98%, 6% 84%); background: linear-gradient(145deg, #d2a16b 0%, #bd8d53 35%, #81542f 72%, #a66c3f 100%); padding-top: 5px; color: #372417; }
-    .period-symbol-daily::before { position: absolute; inset: 11px 12px 9px; z-index: 1; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: linear-gradient(150deg, rgba(176, 112, 58, .48), rgba(90, 50, 29, .18)); content: ""; }
-    .period-symbol-weekly { --medal-glint: #f08a32; clip-path: polygon(50% 0, 61% 13%, 77% 4%, 81% 22%, 99% 25%, 91% 43%, 100% 58%, 82% 66%, 84% 87%, 64% 82%, 50% 100%, 36% 82%, 16% 87%, 18% 66%, 0 58%, 9% 43%, 1% 25%, 19% 22%, 23% 4%, 39% 13%); background: linear-gradient(145deg, #e99b4d 0%, #f08a32 34%, #c55729 68%, #d9782e 100%); color: #482410; }
-    .period-symbol-weekly::before { position: absolute; top: 7px; left: 21px; z-index: 1; width: 5px; height: 5px; transform: rotate(45deg); background: #d9772d; box-shadow: -13px 10px 0 #d9772d, 13px 10px 0 #d9772d; content: ""; }
-    .period-symbol-monthly { --medal-glint: #e34757; clip-path: polygon(0 100%, 8% 15%, 28% 27%, 31% 4%, 48% 21%, 50% 0, 66% 21%, 69% 4%, 72% 27%, 92% 15%, 100% 100%, 50% 88%); background: linear-gradient(145deg, #df5960 0%, #e34d59 34%, #a92743 70%, #c5384d 100%); color: #48121f; padding-top: 5px; }
-    .period-symbol-monthly::before { position: absolute; inset: 11px 12px 8px; z-index: 1; clip-path: polygon(50% 0, 100% 100%, 50% 80%, 0 100%); background: linear-gradient(150deg, rgba(207, 54, 72, .5), rgba(94, 16, 43, .2)); content: ""; }
-    .period-symbol-all-time { --medal-glint: #78bcff; border: 2px solid #78bcff; border-radius: 50%; color: #9bd0f5; font-size: 23px; box-shadow: inset 0 0 0 4px #172c3c, inset 0 0 0 6px #4c83a8, 0 0 0 2px rgba(120, 188, 255, .22); }
+    .period-symbol { position: relative; isolation: isolate; grid-row: span 2; display: block; width: 50px; height: 66px; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .5)); }
+    .period-medal { position: absolute; bottom: 0; left: 1px; z-index: 1; display: grid; width: 48px; height: 48px; place-items: center; border: 2px solid var(--medal-edge); border-radius: 50%; background: radial-gradient(circle at 32% 25%, var(--medal-light), var(--medal-mid) 42%, var(--medal-dark) 100%); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--medal-edge) 70%, transparent), inset 0 0 0 5px color-mix(in srgb, var(--medal-dark) 70%, transparent), inset 0 -7px 10px rgba(34, 15, 10, .25); }
+    .period-medal::after { position: absolute; inset: 5px; border: 1px solid color-mix(in srgb, var(--medal-light) 45%, transparent); border-radius: 50%; content: ""; }
+    .period-glyph { position: relative; z-index: 2; color: var(--medal-ink); font-size: 20px; font-weight: 900; text-shadow: 0 1px 2px color-mix(in srgb, var(--medal-dark) 75%, transparent); }
+    .period-ornament { position: absolute; z-index: 2; display: block; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .45)); }
+    .period-symbol-daily { --medal-edge: #67452d; --medal-light: #d4b17b; --medal-mid: #a77a4b; --medal-dark: #65432d; --medal-ink: #48301e; }
+    .period-ornament-crown { top: 0; left: 7px; width: 36px; height: 16px; clip-path: polygon(0 5%, 22% 43%, 29% 0, 50% 39%, 72% 0, 79% 43%, 100% 5%, 91% 100%, 9% 100%); background: linear-gradient(160deg, #d1aa73, #8b623b 58%, #614329); }
+    .period-ornament-crown::after { position: absolute; inset: 3px 4px 4px; clip-path: inherit; border-bottom: 1px solid #bd8d53; background: linear-gradient(160deg, #bb905b, #73502f); content: ""; }
+    .period-symbol-weekly { --medal-edge: #9c4a24; --medal-light: #f5ad58; --medal-mid: #dc762d; --medal-dark: #943d20; --medal-ink: #572910; }
+    .period-ornament-rings { top: 0; left: 4px; width: 42px; height: 28px; }
+    .period-ornament-rings i { position: absolute; display: block; width: 18px; height: 18px; border: 4px solid #b95225; border-radius: 50%; background: #111815; box-shadow: inset 0 0 0 2px #e58b39, 0 1px 1px rgba(0, 0, 0, .35); }
+    .period-ornament-rings i:nth-child(1) { top: 0; left: 0; }
+    .period-ornament-rings i:nth-child(2) { top: 0; right: 0; }
+    .period-ornament-rings i:nth-child(3) { top: 12px; left: 12px; }
+    .period-symbol-monthly { --medal-edge: #762333; --medal-light: #e77978; --medal-mid: #c64450; --medal-dark: #75263b; --medal-ink: #571c2a; }
+    .period-ornament-halo { top: 2px; left: 6px; width: 38px; height: 16px; border: 4px solid #792b37; border-radius: 50%; background: #111815; box-shadow: inset 0 0 0 2px #c34a53, 0 1px 1px rgba(0, 0, 0, .35); }
+    .period-symbol-all-time { display: grid; width: 48px; height: 48px; place-items: center; border: 2px solid #78bcff; border-radius: 50%; color: #9bd0f5; font-size: 23px; box-shadow: inset 0 0 0 4px #172c3c, inset 0 0 0 6px #4c83a8, 0 0 0 2px rgba(120, 188, 255, .22); }
+    .period-symbol-all-time .period-glyph { color: #9bd0f5; font-size: 23px; }
     .period-tab-title { min-width: 0; font-size: 14px; font-weight: 850; }
     .period-cycle { display: inline-block; margin-left: 6px; padding: 2px 5px; border: 1px solid color-mix(in srgb, var(--tab-accent, var(--green)) 48%, transparent); border-radius: 2px; color: var(--tab-accent, var(--green)); font-size: 9px; font-weight: 800; }
     .period-countdown { grid-column: 2; width: fit-content; padding: 3px 6px; border: 1px solid color-mix(in srgb, var(--tab-accent, var(--green)) 28%, transparent); border-radius: 2px; background: rgba(0, 0, 0, .2); color: #c9d2c8; font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -201,7 +209,15 @@
     .profile-period-name, .profile-badge-label { font-size: 12px; font-weight: 750; }
     .profile-period-score { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
     .profile-badge { width: 100%; color: var(--ink); cursor: pointer; text-align: left; }
-    .profile-badge .period-symbol { grid-row: auto; width: 28px; height: 28px; flex: 0 0 28px; font-size: 11px; }
+    .profile-badge .period-symbol { grid-row: auto; width: 34px; height: 40px; flex: 0 0 34px; }
+    .profile-badge .period-medal { left: 2px; width: 30px; height: 30px; }
+    .profile-badge .period-glyph { font-size: 13px; }
+    .profile-badge .period-ornament-crown { left: 6px; width: 22px; height: 10px; }
+    .profile-badge .period-ornament-rings { left: 2px; width: 28px; height: 18px; }
+    .profile-badge .period-ornament-rings i { width: 12px; height: 12px; border-width: 3px; }
+    .profile-badge .period-ornament-rings i:nth-child(2) { right: 0; }
+    .profile-badge .period-ornament-rings i:nth-child(3) { top: 8px; left: 8px; }
+    .profile-badge .period-ornament-halo { left: 4px; width: 26px; height: 11px; border-width: 3px; }
     .profile-badge:hover { border-color: var(--green); }
     .profile-badge-name { display: block; color: var(--green); font-size: 12px; font-weight: 800; }
     .profile-badge-period { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
@@ -339,11 +355,18 @@
       .round-editor { grid-template-columns: 1fr 1fr; }
       .round-editor .field:first-child, .round-editor .primary-button { grid-column: 1 / -1; }
       .period-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-bottom: 20px; }
-      .period-tab { grid-template-columns: 38px minmax(0, 1fr); gap: 3px 8px; min-height: 72px; padding: 8px; }
-      .period-symbol { width: 36px; height: 36px; font-size: 13px; }
-      .period-symbol-all-time { font-size: 19px; }
-      .period-symbol-daily::before, .period-symbol-monthly::before { inset: 9px 9px 7px; }
-      .period-symbol-weekly::before { top: 5px; left: 15px; width: 4px; height: 4px; box-shadow: -10px 8px 0 #d9772d, 10px 8px 0 #d9772d; }
+      .period-tab { grid-template-columns: 42px minmax(0, 1fr); gap: 3px 8px; min-height: 72px; padding: 8px; }
+      .period-symbol { width: 40px; height: 54px; }
+      .period-medal { left: 1px; width: 38px; height: 38px; }
+      .period-glyph { font-size: 16px; }
+      .period-symbol-all-time { display: grid; width: 36px; height: 36px; }
+      .period-symbol-all-time .period-glyph { font-size: 19px; }
+      .period-ornament-crown { left: 6px; width: 29px; height: 13px; }
+      .period-ornament-rings { left: 2px; width: 36px; height: 24px; }
+      .period-ornament-rings i { width: 15px; height: 15px; border-width: 3px; }
+      .period-ornament-rings i:nth-child(2) { right: 0; }
+      .period-ornament-rings i:nth-child(3) { top: 10px; left: 10px; }
+      .period-ornament-halo { left: 5px; width: 30px; height: 13px; border-width: 3px; }
       .period-tab-title { font-size: 12px; }
       .period-cycle { display: inline-block; margin: 2px 0 0 4px; }
       .period-countdown { font-size: 9px; }
@@ -430,9 +453,9 @@
     </section>
 
     <nav class="period-navigation" id="period-navigation" aria-label="Kategorije leaderboarda">
-      <button class="period-tab" type="button" data-period="daily" aria-pressed="false"><span class="period-symbol period-symbol-daily"><span class="period-glyph">D</span></span><span class="period-tab-title">Daily<span class="period-cycle" data-cycle="daily">#1</span></span><span class="period-countdown" data-countdown="daily">--:--:--</span></button>
-      <button class="period-tab" type="button" data-period="weekly" aria-pressed="false"><span class="period-symbol period-symbol-weekly"><span class="period-glyph">W</span></span><span class="period-tab-title">Weekly<span class="period-cycle" data-cycle="weekly">#1</span></span><span class="period-countdown" data-countdown="weekly">--d --:--:--</span></button>
-      <button class="period-tab" type="button" data-period="monthly" aria-pressed="false"><span class="period-symbol period-symbol-monthly"><span class="period-glyph">M</span></span><span class="period-tab-title">Monthly<span class="period-cycle" data-cycle="monthly">#1</span></span><span class="period-countdown" data-countdown="monthly">--d --:--:--</span></button>
+      <button class="period-tab" type="button" data-period="daily" aria-pressed="false"><span class="period-symbol period-symbol-daily"><span class="period-ornament period-ornament-crown" aria-hidden="true"></span><span class="period-medal"><span class="period-glyph">D</span></span></span><span class="period-tab-title">Daily<span class="period-cycle" data-cycle="daily">#1</span></span><span class="period-countdown" data-countdown="daily">--:--:--</span></button>
+      <button class="period-tab" type="button" data-period="weekly" aria-pressed="false"><span class="period-symbol period-symbol-weekly"><span class="period-ornament period-ornament-rings" aria-hidden="true"><i></i><i></i><i></i></span><span class="period-medal"><span class="period-glyph">W</span></span></span><span class="period-tab-title">Weekly<span class="period-cycle" data-cycle="weekly">#1</span></span><span class="period-countdown" data-countdown="weekly">--d --:--:--</span></button>
+      <button class="period-tab" type="button" data-period="monthly" aria-pressed="false"><span class="period-symbol period-symbol-monthly"><span class="period-ornament period-ornament-halo" aria-hidden="true"></span><span class="period-medal"><span class="period-glyph">M</span></span></span><span class="period-tab-title">Monthly<span class="period-cycle" data-cycle="monthly">#1</span></span><span class="period-countdown" data-countdown="monthly">--d --:--:--</span></button>
       <button class="period-tab" type="button" data-period="all-time" aria-pressed="true"><span class="period-symbol period-symbol-all-time"><span class="period-glyph">∞</span></span><span class="period-tab-title">All Time<span class="period-cycle">Zauvijek</span></span></button>
     </nav>
     <p class="category-description" id="category-description">Ukupni rezultati za sva vremena.</p>
@@ -706,6 +729,16 @@
       })[character]);
     }
 
+    function renderPeriodMedal(type, extraClass = "") {
+      const ornaments = {
+        daily: `<span class="period-ornament period-ornament-crown" aria-hidden="true"></span>`,
+        weekly: `<span class="period-ornament period-ornament-rings" aria-hidden="true"><i></i><i></i><i></i></span>`,
+        monthly: `<span class="period-ornament period-ornament-halo" aria-hidden="true"></span>`,
+      };
+      const glyphs = { daily: "D", weekly: "W", monthly: "M" };
+      return `<span class="period-symbol period-symbol-${type} ${extraClass}" aria-hidden="true">${ornaments[type]}<span class="period-medal"><span class="period-glyph">${glyphs[type]}</span></span></span>`;
+    }
+
     function renderPlayerRow(player, index) {
       const title = titleForWins(player.titleWins ?? player.wins);
       const editingAllTime = editing && selectedCategory === "all-time";
@@ -870,7 +903,7 @@
       badgesContainer.innerHTML = playerBadges.length ? playerBadges.map((archive) => `
         <button class="profile-badge" type="button" data-archive-id="${escapeHtml(archive.id)}">
           <span><span class="profile-badge-name">${escapeHtml(periodLabels[archive.period_type] || archive.period_type)} #${archive.cycle_number}</span><span class="profile-badge-period">${escapeHtml(archive.period_key)}</span></span>
-          <span class="period-symbol period-symbol-${archive.period_type}" aria-hidden="true"><span class="period-glyph">${archive.period_type === "daily" ? "D" : archive.period_type === "weekly" ? "W" : "M"}</span></span>
+          ${renderPeriodMedal(archive.period_type, "profile-badge")}
         </button>`).join("") : `<span class="record-empty">Još nema osvojenih znački.</span>`;
       document.querySelector("#profile-dialog").showModal();
     }
