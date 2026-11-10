@@ -160,7 +160,7 @@
     .round-editor .primary-button { min-width: 125px; }
 
     .period-navigation { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0 0 26px; }
-    .period-tab { position: relative; display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 4px 12px; min-height: 88px; padding: 11px 14px; overflow: hidden; border: 1px solid #33413a; border-radius: 4px; background: linear-gradient(155deg, #1a2420, #101714 72%); color: var(--ink); text-align: left; transition: border-color .2s ease, transform .2s ease, background .2s ease; }
+    .period-tab { position: relative; display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 4px 12px; min-height: 88px; padding: 11px 14px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--tab-accent, #78905b) 46%, #33413a); border-radius: 4px; background: linear-gradient(155deg, #1a2420, #101714 72%); color: var(--ink); text-align: left; transition: border-color .2s ease, transform .2s ease, background .2s ease; }
     .period-tab::before { position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--tab-accent, #78905b); content: ""; opacity: .8; }
     .period-tab::after { position: absolute; inset: auto 14px 0 66px; height: 1px; background: linear-gradient(90deg, var(--tab-accent, #78905b), transparent); content: ""; opacity: .65; }
     .period-tab[data-period="daily"] { --tab-accent: #bb8b55; }
@@ -186,14 +186,14 @@
     .period-ornament-rings i { position: absolute; z-index: 1; display: block; width: 14px; height: 14px; border: 3px solid #b95225; border-radius: 50%; background: #111815; box-shadow: inset 0 0 0 2px #e58b39, 0 1px 1px rgba(0, 0, 0, .35); }
     .period-ornament-rings i:nth-child(1) { top: 0; left: 0; }
     .period-ornament-rings i:nth-child(2) { top: 0; right: 0; }
-    .period-ornament-rings i:nth-child(3) { top: 13px; left: 17px; }
+    .period-ornament-rings i:nth-child(3) { top: 9px; left: 17px; }
     .period-symbol-monthly { --medal-edge: #762333; --medal-light: #e77978; --medal-mid: #c64450; --medal-dark: #75263b; --medal-ink: #571c2a; }
     .period-ornament-halo { top: 14px; left: 4px; width: 42px; height: 11px; border: 3px solid #792b37; border-radius: 50%; background: #111815; box-shadow: inset 0 0 0 1px #c34a53, 0 1px 1px rgba(0, 0, 0, .35); }
     .period-symbol-all-time { display: grid; width: 48px; height: 48px; place-items: center; border: 2px solid #78bcff; border-radius: 50%; color: #9bd0f5; font-size: 23px; box-shadow: inset 0 0 0 4px #172c3c, inset 0 0 0 6px #4c83a8, 0 0 0 2px rgba(120, 188, 255, .22); }
     .period-symbol-all-time .period-glyph { color: #9bd0f5; font-size: 23px; }
     .period-tab-title { min-width: 0; font-size: 14px; font-weight: 850; }
-    .period-cycle { display: inline-block; margin-left: 6px; padding: 2px 5px; border: 1px solid color-mix(in srgb, var(--tab-accent, var(--green)) 48%, transparent); border-radius: 2px; color: var(--tab-accent, var(--green)); font-size: 9px; font-weight: 800; }
-    .period-countdown { grid-column: 2; width: fit-content; padding: 3px 6px; border: 1px solid color-mix(in srgb, var(--tab-accent, var(--green)) 28%, transparent); border-radius: 2px; background: rgba(0, 0, 0, .2); color: #c9d2c8; font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .period-cycle { display: inline-block; margin-left: 6px; color: var(--tab-accent, var(--green)); font-size: 9px; font-weight: 800; }
+    .period-countdown { grid-column: 2; width: fit-content; padding: 0; color: #c9d2c8; font-size: 10px; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .category-description { margin: -14px 0 18px; color: var(--muted); font-size: 12px; }
     .period-correction-note { margin: 0 0 12px; padding: 9px 11px; border-left: 2px solid var(--title-yellow); background: rgba(255, 209, 102, .07); color: #e7d4a0; font-size: 12px; line-height: 1.45; }
     .period-correction-note[hidden] { display: none; }
@@ -375,7 +375,7 @@
       .period-ornament-rings::after { right: 8px; }
       .period-ornament-rings i { width: 11px; height: 11px; border-width: 2px; }
       .period-ornament-rings i:nth-child(2) { right: 0; }
-      .period-ornament-rings i:nth-child(3) { top: 11px; left: 12px; }
+      .period-ornament-rings i:nth-child(3) { top: 8px; left: 12px; }
       .period-ornament-halo { top: 12px; left: 4px; width: 34px; height: 9px; border-width: 2px; }
       .period-tab-title { font-size: 12px; }
       .period-cycle { display: inline-block; margin: 2px 0 0 4px; }
