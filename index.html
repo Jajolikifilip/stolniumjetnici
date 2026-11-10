@@ -924,7 +924,7 @@
       badgesContainer.innerHTML = playerBadges.length ? playerBadges.map((archive) => `
         <button class="profile-badge" type="button" data-archive-id="${escapeHtml(archive.id)}">
           <span><span class="profile-badge-name">${escapeHtml(periodLabels[archive.period_type] || archive.period_type)} #${archive.cycle_number}</span><span class="profile-badge-period">${escapeHtml(archive.period_key)}</span></span>
-          ${renderPeriodMedal(archive.period_type, "profile-badge")}
+          ${renderPeriodMedal(archive.period_type, "profile-badge-medal")}
         </button>`).join("") : `<span class="record-empty">Još nema osvojenih znački.</span>`;
       document.querySelector("#profile-dialog").showModal();
     }
