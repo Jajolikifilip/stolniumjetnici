@@ -64,7 +64,7 @@ class TestPool {
     if (query.includes("INSERT INTO leaderboard_period_corrections")) {
       const correction = {
         period_type: values[0], period_key: values[1], cycle_number: values[2], player_id: values[3],
-        player_name: values[4], wins_delta: values[5], losses_delta: values[6],
+        player_name: values[4], wins_delta: values[5], losses_delta: values[6], is_hidden: values[7],
       };
       corrections.set(`${values[0]}:${values[1]}:${values[3]}`, correction);
       return { rows: [] };
@@ -105,6 +105,19 @@ class TestPool {
           starts_at: values[4], ends_at: values[5], winner_player_id: values[6], winner_name: values[7],
           leaderboard: JSON.parse(values[8]),
         });
+      }
+      return { rows: [] };
+    }
+    if (query.includes("SELECT leaderboard FROM leaderboard_archives WHERE id = $1 FOR UPDATE")) {
+      const archive = archives.find((entry) => entry.id === values[0]);
+      return { rows: archive ? [{ leaderboard: archive.leaderboard }] : [] };
+    }
+    if (query.includes("UPDATE leaderboard_archives")) {
+      const archive = archives.find((entry) => entry.id === values[3]);
+      if (archive) {
+        archive.leaderboard = JSON.parse(values[0]);
+        archive.winner_player_id = values[1];
+        archive.winner_name = values[2];
       }
       return { rows: [] };
     }
@@ -285,6 +298,18 @@ test("shared period rankings require admin-authenticated match results", async (
   const correctedAndAutoUpdated = await response.json();
   assert.equal(correctedAndAutoUpdated.categories.daily.players.find((player) => player.id === "ante").wins, 6);
 
+  const activeDaily = correctedAndAutoUpdated.categories.daily;
+  response = await fetch(`${url}/api/period-corrections/daily/damir`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ periodKey: activeDaily.periodKey, cycleNumber: activeDaily.cycleNumber, wins: 5, losses: 2, isHidden: true }),
+  });
+  assert.equal(response.status, 200);
+  response = await fetch(`${url}/api/state`);
+  const hiddenPeriodPlayer = await response.json();
+  assert.equal(hiddenPeriodPlayer.categories.daily.players.some((player) => player.id === "damir"), false);
+  assert.equal(hiddenPeriodPlayer.categories["all-time"].players.some((player) => player.id === "damir"), true);
+
   state.players[0].wins = 11;
   state.players[1].losses = 3;
 
@@ -313,4 +338,56 @@ test("shared period rankings require admin-authenticated match results", async (
   assert.equal(response.status, 200);
   const archivedLeaderboard = await response.json();
   assert.equal(archivedLeaderboard.leaderboard[0].titleWins, 11);
+
+    const bobbyArchive = {
+      id: "00000000-0000-4000-8000-000000000123",
+      period_type: "daily",
+      period_key: "2026-10-28",
+      cycle_number: 1,
+      starts_at: new Date("2026-10-28T00:00:00Z"),
+      ends_at: new Date("2026-10-29T00:00:00Z"),
+      winner_player_id: "bobby",
+      winner_name: "Bobby",
+      leaderboard: [
+        { id: "bobby", name: "Bobby", wins: 3, losses: 1, titleWins: 10 },
+        { id: "ante", name: "Ante", wins: 2, losses: 1, titleWins: 11 },
+        { id: "damir", name: "Damir", wins: 1, losses: 1, titleWins: 5 },
+      ],
+    };
+    archives.push(bobbyArchive);
+    response = await fetch(`${url}/api/archives/${bobbyArchive.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ players: bobbyArchive.leaderboard.filter((player) => player.id !== "bobby") }),
+    });
+    assert.equal(response.status, 200);
+    const editedBobbyArchive = await response.json();
+    assert.deepEqual(editedBobbyArchive.leaderboard.map((player) => player.id), ["ante", "damir"]);
+    assert.equal(editedBobbyArchive.winner_player_id, "ante");
+
+  const archiveToEdit = {
+    id: "00000000-0000-4000-8000-000000000123",
+    period_type: "daily",
+    period_key: "2026-10-28",
+    cycle_number: 1,
+    starts_at: new Date("2026-10-28T00:00:00Z"),
+    ends_at: new Date("2026-10-29T00:00:00Z"),
+    winner_player_id: "bobby",
+    winner_name: "Bobby",
+    leaderboard: [
+      { id: "bobby", name: "Bobby", wins: 3, losses: 1, titleWins: 10 },
+      { id: "ante", name: "Ante", wins: 2, losses: 1, titleWins: 11 },
+      { id: "damir", name: "Damir", wins: 1, losses: 1, titleWins: 5 },
+    ],
+  };
+  archives.push(archiveToEdit);
+  response = await fetch(`${url}/api/archives/${archiveToEdit.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ players: archiveToEdit.leaderboard.filter((player) => player.id !== "bobby") }),
+  });
+  assert.equal(response.status, 200);
+  const editedArchive = await response.json();
+  assert.equal(editedArchive.winner_player_id, "ante");
+  assert.deepEqual(editedArchive.leaderboard.map((player) => player.id), ["ante", "damir"]);
 });

@@ -208,9 +208,14 @@
     .archive-winner { margin: 0 0 14px; color: var(--green); font-weight: 750; }
     .archive-list { display: grid; gap: 7px; max-height: 48vh; overflow-y: auto; }
     .archive-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) repeat(3, auto); align-items: center; gap: 8px; padding: 10px; border-top: 1px solid var(--line); font-size: 12px; }
+    .archive-row.is-editing { grid-template-columns: 34px minmax(0, 1fr) repeat(3, auto) auto; }
     .archive-rank { color: var(--muted); font-variant-numeric: tabular-nums; }
     .archive-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 750; }
     .archive-stat { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .archive-remove { padding: 5px 7px; border: 1px solid rgba(255, 116, 101, .4); border-radius: 2px; background: rgba(255, 116, 101, .08); color: var(--red); font-size: 10px; font-weight: 750; white-space: nowrap; }
+    .archive-remove:hover { background: rgba(255, 116, 101, .17); }
+    .archive-actions { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
+    .archive-actions[hidden] { display: none; }
 
     .section-heading { margin-bottom: 13px; }
     .section-heading h2 { margin: 0; font-family: Georgia, serif; font-size: 23px; font-weight: 400; }
@@ -345,7 +350,10 @@
       .match-form { grid-template-columns: 1fr 1fr; gap: 10px; }
       .match-form .primary-button { grid-column: 1 / -1; }
       .archive-row { grid-template-columns: 22px minmax(0, 1fr) repeat(3, auto); gap: 5px; padding: 8px 3px; font-size: 10px; }
+      .archive-row.is-editing { grid-template-columns: 18px minmax(0, 1fr) repeat(3, auto); }
       .archive-stat { font-size: 10px; }
+      .archive-row.is-editing .archive-remove { grid-column: 2 / -1; justify-self: end; }
+      .archive-actions { justify-content: flex-start; }
       .profile-period-row, .profile-badge { gap: 7px; padding: 8px; }
       .profile-period-name, .profile-period-score, .profile-badge-name { font-size: 11px; }
       .table-wrap { margin-right: 0; padding-right: 0; overflow-x: hidden; }
@@ -380,6 +388,11 @@
       table.editing .delete-button { padding: 6px 0; font-size: 10px; }
       table.editing-period .edit-input { width: 100%; min-width: 0; padding: 0 2px; }
       table.editing-period .record, table.editing-period .rate { font-size: 13px; }
+      table.editing-period th:first-child, table.editing-period td:first-child { width: 8%; }
+      table.editing-period th:nth-child(2), table.editing-period td:nth-child(2) { width: 30%; }
+      table.editing-period th:nth-child(3), table.editing-period td:nth-child(3), table.editing-period th:nth-child(4), table.editing-period td:nth-child(4) { width: 10%; }
+      table.editing-period th:nth-child(5), table.editing-period td:nth-child(5) { width: 25%; }
+      table.editing-period th:last-child, table.editing-period td:last-child { width: 17%; }
       .add-form { grid-template-columns: 1fr 1fr; }
       .field:first-child { grid-column: 1 / -1; }
       .primary-button { grid-column: 1 / -1; }
@@ -524,6 +537,10 @@
     <div class="dialog-eyebrow">Arhivirana ljestvica</div>
     <h2 id="archive-title"></h2>
     <p class="archive-winner" id="archive-winner"></p>
+    <div class="archive-actions" id="archive-actions" hidden>
+      <button class="cancel-button" id="edit-archive" type="button">Uredi arhivu</button>
+      <button class="primary-button" id="save-archive" type="button" hidden>Spremi arhivu</button>
+    </div>
     <div class="archive-list" id="archive-list"></div>
     <div class="dialog-actions"><button class="cancel-button" id="close-archive" type="button">Zatvori</button></div>
   </dialog>
@@ -547,6 +564,8 @@
     let saveQueue = Promise.resolve();
     let categoryData = {};
     let archives = [];
+    let activeArchive = null;
+    let editingArchive = false;
     let selectedCategory = "all-time";
     let countdownRefreshPending = false;
     let players = localBackup.players.map((player) => ({ ...player }));
@@ -690,6 +709,7 @@
     function renderPlayerRow(player, index) {
       const title = titleForWins(player.titleWins ?? player.wins);
       const editingAllTime = editing && selectedCategory === "all-time";
+      const editingPeriod = editing && selectedCategory !== "all-time";
       return `
         <tr>
           <td class="rank${title ? ` title-${title.className}` : ""}" data-label="#">${index + 1}</td>
@@ -705,7 +725,7 @@
             ? `<input class="edit-input" aria-label="Porazi igrača ${escapeHtml(player.name)}" data-id="${escapeHtml(player.id)}" data-field="losses" type="number" min="0" step="1" value="${player.losses}">`
             : player.losses}</td>
           <td class="rate" data-label="Postotak"><span class="rate-pill">${formatRate(player)}</span></td>
-          ${editingAllTime ? `<td class="row-actions" data-label="Akcije"><button class="delete-button" type="button" data-delete="${escapeHtml(player.id)}" aria-label="Obriši igrača ${escapeHtml(player.name)}">Obriši</button></td>` : ""}
+          ${editingAllTime ? `<td class="row-actions" data-label="Akcije"><button class="delete-button" type="button" data-delete="${escapeHtml(player.id)}" aria-label="Obriši igrača ${escapeHtml(player.name)}">Obriši</button></td>` : editingPeriod ? `<td class="row-actions" data-label="Akcije"><button class="archive-remove" type="button" data-remove-period-player="${escapeHtml(player.id)}" aria-label="Ukloni ${escapeHtml(player.name)} samo iz ove ljestvice">Ukloni</button></td>` : ""}
         </tr>`;
     }
 
@@ -855,7 +875,33 @@
       document.querySelector("#profile-dialog").showModal();
     }
 
+    function renderArchivedLeaderboard() {
+      if (!activeArchive) return;
+      const periodLabels = { daily: "Daily", weekly: "Weekly", monthly: "Monthly" };
+      const label = periodLabels[activeArchive.period_type] || activeArchive.period_type;
+      document.querySelector("#archive-title").textContent = `${label} #${activeArchive.cycle_number} · ${activeArchive.period_key}`;
+      document.querySelector("#archive-winner").textContent = activeArchive.winner_name
+        ? `Pobjednik: ${activeArchive.winner_name}`
+        : "Pobjednik: —";
+      document.querySelector("#archive-actions").hidden = !editorToken;
+      document.querySelector("#edit-archive").hidden = editingArchive;
+      document.querySelector("#save-archive").hidden = !editingArchive;
+      document.querySelector("#archive-list").innerHTML = activeArchive.leaderboard.map((player, index) => {
+        const title = titleForWins(player.titleWins ?? player.wins);
+        return `<div class="archive-row${editingArchive ? " is-editing" : ""}">
+          <span class="archive-rank">${index + 1}</span>
+          <span class="archive-name">${title ? `<span class="title-code title-${title.className}">${title.code}</span> ` : ""}${escapeHtml(player.name)}</span>
+          <span class="archive-stat">${player.wins} W</span>
+          <span class="archive-stat">${player.losses} L</span>
+          <span class="archive-stat">${numberFormat.format(player.wins + player.losses === 0 ? 0 : player.wins / (player.wins + player.losses) * 100)}%</span>
+          ${editingArchive ? `<button class="archive-remove" type="button" data-remove-archived-player="${escapeHtml(player.id)}" ${activeArchive.leaderboard.length === 1 ? "disabled" : ""}>Ukloni</button>` : ""}
+        </div>`;
+      }).join("");
+    }
+
     async function openArchivedLeaderboard(archive) {
+      activeArchive = archive;
+      editingArchive = false;
       if (!archive.leaderboard) {
         document.querySelector("#archive-title").textContent = "Učitavam arhivu...";
         document.querySelector("#archive-winner").textContent = "";
@@ -872,20 +918,8 @@
           return;
         }
       }
-      const periodLabels = { daily: "Daily", weekly: "Weekly", monthly: "Monthly" };
-      const label = periodLabels[archive.period_type] || archive.period_type;
-      document.querySelector("#archive-title").textContent = `${label} #${archive.cycle_number} · ${archive.period_key}`;
-      document.querySelector("#archive-winner").textContent = `Pobjednik: ${archive.winner_name}`;
-      document.querySelector("#archive-list").innerHTML = archive.leaderboard.map((player, index) => {
-        const title = titleForWins(player.titleWins ?? player.wins);
-        return `<div class="archive-row">
-          <span class="archive-rank">${index + 1}</span>
-          <span class="archive-name">${title ? `<span class="title-code title-${title.className}">${title.code}</span> ` : ""}${escapeHtml(player.name)}</span>
-          <span class="archive-stat">${player.wins} W</span>
-          <span class="archive-stat">${player.losses} L</span>
-          <span class="archive-stat">${numberFormat.format(player.wins + player.losses === 0 ? 0 : player.wins / (player.wins + player.losses) * 100)}%</span>
-        </div>`;
-      }).join("");
+      activeArchive = archive;
+      renderArchivedLeaderboard();
       document.querySelector("#archive-dialog").showModal();
     }
 
@@ -922,7 +956,7 @@
       renderMatchSelectors(allTimeRanked);
       renderLongestRound(allTimeRanked);
       document.querySelector("#add-section").hidden = !editingAllTime;
-      document.querySelector("#actions-heading").hidden = !editingAllTime;
+      document.querySelector("#actions-heading").hidden = !editing;
       document.querySelector("#period-correction-note").hidden = !editing || editingAllTime;
       document.querySelector("#board-caption").textContent = editing
         ? editingAllTime ? "Uredi All Time; aktivne ljestvice prate promjene" : "Ispravi W/L u ovoj periodnoj ljestvici"
@@ -953,6 +987,46 @@
     document.querySelector("#close-titles").addEventListener("click", () => titlesDialog.close());
     document.querySelector("#close-profile").addEventListener("click", () => document.querySelector("#profile-dialog").close());
     document.querySelector("#close-archive").addEventListener("click", () => document.querySelector("#archive-dialog").close());
+    document.querySelector("#edit-archive").addEventListener("click", () => {
+      editingArchive = true;
+      renderArchivedLeaderboard();
+    });
+
+    document.querySelector("#archive-list").addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-remove-archived-player]");
+      if (!removeButton || !editingArchive || !activeArchive || activeArchive.leaderboard.length <= 1) return;
+      const playerId = removeButton.dataset.removeArchivedPlayer;
+      activeArchive.leaderboard = activeArchive.leaderboard.filter((player) => player.id !== playerId);
+      renderArchivedLeaderboard();
+    });
+
+    document.querySelector("#save-archive").addEventListener("click", async () => {
+      if (!activeArchive || !editorToken) return;
+      const saveButton = document.querySelector("#save-archive");
+      saveButton.disabled = true;
+      try {
+        const response = await fetch(`/api/archives/${encodeURIComponent(activeArchive.id)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${editorToken}` },
+          body: JSON.stringify({ players: activeArchive.leaderboard }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Arhiva nije spremljena.");
+        activeArchive = result;
+        editingArchive = false;
+        await loadSharedState();
+        renderArchivedLeaderboard();
+        setSyncStatus("Arhivirana ljestvica je spremljena; pobjednička značka je ažurirana.", "ok");
+      } catch (error) {
+        setSyncStatus(error.message || "Arhiva nije spremljena.", "error");
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+
+    document.querySelector("#profile-dialog").addEventListener("close", () => {
+      if (document.querySelector("#archive-dialog").open) document.querySelector("#archive-dialog").close();
+    });
 
     document.querySelector("#period-navigation").addEventListener("click", (event) => {
       const button = event.target.closest("[data-period]");
@@ -1114,6 +1188,29 @@
         player[input.dataset.field] = value;
         render();
         savePeriodCorrection(player);
+      }
+    });
+
+    boardBody.addEventListener("click", async (event) => {
+      const removeButton = event.target.closest("[data-remove-period-player]");
+      if (!removeButton || !editorToken || selectedCategory === "all-time") return;
+      const player = categoryData[selectedCategory]?.players.find((entry) => entry.id === removeButton.dataset.removePeriodPlayer);
+      const period = categoryData[selectedCategory];
+      if (!player || !period) return;
+      removeButton.disabled = true;
+      setSyncStatus(`Uklanjam ${player.name} samo iz ${selectedCategory} #${period.cycleNumber}...`);
+      try {
+        const response = await fetch(`/api/period-corrections/${selectedCategory}/${encodeURIComponent(player.id)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${editorToken}` },
+          body: JSON.stringify({ periodKey: period.periodKey, cycleNumber: period.cycleNumber, wins: player.wins, losses: player.losses, isHidden: true }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Igrača nije bilo moguće ukloniti.");
+        await loadSharedState();
+        setSyncStatus(`${player.name} je uklonjen samo iz ovog ciklusa.`, "ok");
+      } catch (error) {
+        setSyncStatus(error.message || "Igrača nije bilo moguće ukloniti.", "error");
       }
     });
 

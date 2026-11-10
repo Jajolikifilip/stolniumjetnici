@@ -139,11 +139,15 @@ async function getPeriodLeaderboard(client, type, periodKey, players, includeCor
 
   if (includeCorrections) {
     const correctionResult = await client.query(
-      `SELECT player_id, player_name, wins_delta, losses_delta
+      `SELECT player_id, player_name, wins_delta, losses_delta, is_hidden
        FROM leaderboard_period_corrections WHERE period_type = $1 AND period_key = $2`,
       [type, periodKey],
     );
     for (const correction of correctionResult.rows) {
+      if (correction.is_hidden) {
+        scores.delete(correction.player_id);
+        continue;
+      }
       if (!scores.has(correction.player_id)) {
         scores.set(correction.player_id, { id: correction.player_id, name: correction.player_name, titleWins: 0, wins: 0, losses: 0 });
       }
@@ -258,6 +262,58 @@ app.get("/api/archives/:id", async (request, response, next) => {
     response.json(result.rows[0]);
   } catch (error) {
     next(error);
+  }
+});
+
+app.put("/api/archives/:id", async (request, response, next) => {
+  if (!hasValidToken(request)) return response.status(401).json({ error: "Prijava je istekla. Prijavi se ponovno." });
+  if (!/^[\da-f-]{36}$/i.test(request.params.id)) return response.status(400).json({ error: "Neispravna arhiva." });
+  if (!Array.isArray(request.body.players) || request.body.players.length === 0 || request.body.players.length > 500) {
+    return response.status(400).json({ error: "Arhiva mora imati barem jednog igrača." });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const archiveResult = await client.query("SELECT leaderboard FROM leaderboard_archives WHERE id = $1 FOR UPDATE", [request.params.id]);
+    const archive = archiveResult.rows[0];
+    if (!archive) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Arhiva nije pronađena." });
+    }
+
+    const existingById = new Map(archive.leaderboard.map((player) => [player.id, player]));
+    const retained = [];
+    const retainedIds = new Set();
+    for (const submitted of request.body.players) {
+      const existing = submitted && existingById.get(submitted.id);
+      if (!existing || retainedIds.has(existing.id)) {
+        await client.query("ROLLBACK");
+        return response.status(400).json({ error: "Arhiva dopušta samo uklanjanje postojećih igrača." });
+      }
+      if (!Number.isSafeInteger(existing.wins) || existing.wins < 0 || !Number.isSafeInteger(existing.losses) || existing.losses < 0) {
+        await client.query("ROLLBACK");
+        return response.status(400).json({ error: "Neispravni spremljeni rezultati." });
+      }
+      retainedIds.add(existing.id);
+      retained.push(existing);
+    }
+
+    const leaderboard = rankPlayers(retained);
+    const winner = leaderboard.find((player) => player.wins > 0);
+    await client.query(
+      `UPDATE leaderboard_archives
+       SET leaderboard = $1::jsonb, winner_player_id = $2, winner_name = $3
+       WHERE id = $4`,
+      [JSON.stringify(leaderboard), winner ? winner.id : "", winner ? winner.name : "", request.params.id],
+    );
+    await client.query("COMMIT");
+    response.json({ ...archive, leaderboard, winner_player_id: winner ? winner.id : "", winner_name: winner ? winner.name : "" });
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    next(error);
+  } finally {
+    client.release();
   }
 });
 
@@ -450,6 +506,7 @@ app.put("/api/period-corrections/:type/:playerId", async (request, response, nex
   const cycleNumber = Number(request.body.cycleNumber);
   const wins = request.body.wins;
   const losses = request.body.losses;
+  const isHidden = request.body.isHidden === true;
   if (!Number.isSafeInteger(wins) || wins < 0 || wins > 500000 || !Number.isSafeInteger(losses) || losses < 0 || losses > 500000) {
     return response.status(400).json({ error: "Upiši ispravne vrijednosti za W i L." });
   }
@@ -492,7 +549,7 @@ app.put("/api/period-corrections/:type/:playerId", async (request, response, nex
       return response.status(400).json({ error: "Ispravka može promijeniti najviše 500 rezultata." });
     }
 
-    if (winsDelta === 0 && lossesDelta === 0) {
+    if (winsDelta === 0 && lossesDelta === 0 && !isHidden) {
       await client.query(
         "DELETE FROM leaderboard_period_corrections WHERE period_type = $1 AND period_key = $2 AND player_id = $3",
         [type, periodKey, playerId],
@@ -500,12 +557,13 @@ app.put("/api/period-corrections/:type/:playerId", async (request, response, nex
     } else {
       await client.query(
         `INSERT INTO leaderboard_period_corrections
-           (period_type, period_key, cycle_number, player_id, player_name, wins_delta, losses_delta, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+           (period_type, period_key, cycle_number, player_id, player_name, wins_delta, losses_delta, is_hidden, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
          ON CONFLICT (period_type, period_key, player_id)
          DO UPDATE SET cycle_number = EXCLUDED.cycle_number, player_name = EXCLUDED.player_name,
-                       wins_delta = EXCLUDED.wins_delta, losses_delta = EXCLUDED.losses_delta, updated_at = NOW()`,
-        [type, periodKey, cycleNumber, playerId, player.name, winsDelta, lossesDelta],
+                       wins_delta = EXCLUDED.wins_delta, losses_delta = EXCLUDED.losses_delta,
+                       is_hidden = EXCLUDED.is_hidden, updated_at = NOW()`,
+        [type, periodKey, cycleNumber, playerId, player.name, winsDelta, lossesDelta, isHidden],
       );
     }
 
@@ -620,10 +678,12 @@ async function start() {
       player_name text NOT NULL,
       wins_delta integer NOT NULL,
       losses_delta integer NOT NULL,
+      is_hidden boolean NOT NULL DEFAULT FALSE,
       updated_at timestamptz NOT NULL DEFAULT NOW(),
       PRIMARY KEY (period_type, period_key, player_id)
     )
   `);
+  await pool.query("ALTER TABLE leaderboard_period_corrections ADD COLUMN IF NOT EXISTS is_hidden boolean NOT NULL DEFAULT FALSE");
   await pool.query("CREATE INDEX IF NOT EXISTS leaderboard_archives_winner_idx ON leaderboard_archives (winner_player_id)");
   await pool.query(
     "INSERT INTO leaderboard_state (id, data, initialized) VALUES (1, $1::jsonb, FALSE) ON CONFLICT (id) DO NOTHING",
